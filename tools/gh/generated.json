@@ -40,6 +40,13 @@
               },
               {
                 "names": [
+                  "--hostname"
+                ],
+                "arg": "string",
+                "description": "The hostname of the GitHub instance to authenticate with"
+              },
+              {
+                "names": [
                   "--insecure-storage"
                 ],
                 "description": "Save authentication credentials in plain text instead of credential store"
@@ -81,6 +88,13 @@
             "flags": [
               {
                 "names": [
+                  "--hostname"
+                ],
+                "arg": "string",
+                "description": "The hostname of the GitHub instance to log out of"
+              },
+              {
+                "names": [
                   "-u",
                   "--user"
                 ],
@@ -100,6 +114,13 @@
                   "--clipboard"
                 ],
                 "description": "Copy one-time OAuth device code to clipboard"
+              },
+              {
+                "names": [
+                  "--hostname"
+                ],
+                "arg": "string",
+                "description": "The GitHub host to use for authentication"
               },
               {
                 "names": [
@@ -141,9 +162,16 @@
               {
                 "names": [
                   "-f",
-                  "--force --hostname"
+                  "--force"
                 ],
                 "description": "Force setup even if the host is not known. Must be used in conjunction with --hostname"
+              },
+              {
+                "names": [
+                  "--hostname"
+                ],
+                "arg": "string",
+                "description": "The hostname to configure git for"
               }
             ],
             "subcommands": []
@@ -158,6 +186,13 @@
                   "--active"
                 ],
                 "description": "Display the active account only"
+              },
+              {
+                "names": [
+                  "--hostname"
+                ],
+                "arg": "string",
+                "description": "Check only a specific hostname's auth status"
               },
               {
                 "names": [
@@ -197,6 +232,13 @@
             "flags": [
               {
                 "names": [
+                  "--hostname"
+                ],
+                "arg": "string",
+                "description": "The hostname of the GitHub instance to switch account for"
+              },
+              {
+                "names": [
                   "-u",
                   "--user"
                 ],
@@ -210,6 +252,13 @@
             "name": "token",
             "description": "Print the authentication token gh uses for a hostname and account",
             "flags": [
+              {
+                "names": [
+                  "--hostname"
+                ],
+                "arg": "string",
+                "description": "The hostname of the GitHub instance authenticated with"
+              },
               {
                 "names": [
                   "-u",
@@ -791,7 +840,68 @@
                 "description": "Format JSON output using a Go template; see \"gh help formatting\""
               }
             ],
-            "subcommands": []
+            "subcommands": [
+              {
+                "name": "forward",
+                "description": "Forward ports",
+                "flags": [
+                  {
+                    "names": [
+                      "-c",
+                      "--codespace"
+                    ],
+                    "arg": "string",
+                    "description": "Name of the codespace"
+                  },
+                  {
+                    "names": [
+                      "-R",
+                      "--repo"
+                    ],
+                    "arg": "string",
+                    "description": "Filter codespace selection by repository name (user/repo)"
+                  },
+                  {
+                    "names": [
+                      "--repo-owner"
+                    ],
+                    "arg": "string",
+                    "description": "Filter codespace selection by repository owner (username or org)"
+                  }
+                ],
+                "subcommands": []
+              },
+              {
+                "name": "visibility",
+                "description": "Change the visibility of the forwarded port",
+                "flags": [
+                  {
+                    "names": [
+                      "-c",
+                      "--codespace"
+                    ],
+                    "arg": "string",
+                    "description": "Name of the codespace"
+                  },
+                  {
+                    "names": [
+                      "-R",
+                      "--repo"
+                    ],
+                    "arg": "string",
+                    "description": "Filter codespace selection by repository name (user/repo)"
+                  },
+                  {
+                    "names": [
+                      "--repo-owner"
+                    ],
+                    "arg": "string",
+                    "description": "Filter codespace selection by repository owner (username or org)"
+                  }
+                ],
+                "subcommands": []
+              }
+            ]
           },
           {
             "name": "rebuild",
@@ -2915,7 +3025,7 @@
           },
           {
             "name": "update-branch",
-            "description": "",
+            "description": "Update a pull request branch",
             "flags": [
               {
                 "names": [
@@ -3819,7 +3929,7 @@
           },
           {
             "name": "mark-template",
-            "description": "",
+            "description": "Mark a project as a template",
             "flags": [
               {
                 "names": [
@@ -4512,6 +4622,13 @@
               },
               {
                 "names": [
+                  "--homepage"
+                ],
+                "arg": "URL",
+                "description": "Repository home page URL"
+              },
+              {
+                "names": [
                   "--include-all-branches"
                 ],
                 "description": "Include all branches from template repository"
@@ -4696,7 +4813,136 @@
                 "description": "Select another repository using the [HOST/]OWNER/REPO format"
               }
             ],
-            "subcommands": []
+            "subcommands": [
+              {
+                "name": "create",
+                "description": "Create a new autolink reference",
+                "flags": [
+                  {
+                    "names": [
+                      "-n",
+                      "--numeric"
+                    ],
+                    "description": "Mark autolink as numeric"
+                  },
+                  {
+                    "names": [
+                      "-R",
+                      "--repo"
+                    ],
+                    "arg": "[HOST/]OWNER/REPO",
+                    "description": "Select another repository using the [HOST/]OWNER/REPO format"
+                  }
+                ],
+                "subcommands": []
+              },
+              {
+                "name": "delete",
+                "description": "Delete an autolink reference",
+                "flags": [
+                  {
+                    "names": [
+                      "--yes"
+                    ],
+                    "description": "Confirm deletion without prompting"
+                  },
+                  {
+                    "names": [
+                      "-R",
+                      "--repo"
+                    ],
+                    "arg": "[HOST/]OWNER/REPO",
+                    "description": "Select another repository using the [HOST/]OWNER/REPO format"
+                  }
+                ],
+                "subcommands": []
+              },
+              {
+                "name": "list",
+                "description": "List autolink references for a GitHub repository",
+                "flags": [
+                  {
+                    "names": [
+                      "-q",
+                      "--jq"
+                    ],
+                    "arg": "expression",
+                    "description": "Filter JSON output using a jq expression"
+                  },
+                  {
+                    "names": [
+                      "--json"
+                    ],
+                    "arg": "fields",
+                    "repeatable": true,
+                    "description": "Output JSON with the specified fields"
+                  },
+                  {
+                    "names": [
+                      "-t",
+                      "--template"
+                    ],
+                    "arg": "string",
+                    "description": "Format JSON output using a Go template; see \"gh help formatting\""
+                  },
+                  {
+                    "names": [
+                      "-w",
+                      "--web"
+                    ],
+                    "description": "List autolink references in the web browser"
+                  },
+                  {
+                    "names": [
+                      "-R",
+                      "--repo"
+                    ],
+                    "arg": "[HOST/]OWNER/REPO",
+                    "description": "Select another repository using the [HOST/]OWNER/REPO format"
+                  }
+                ],
+                "subcommands": []
+              },
+              {
+                "name": "view",
+                "description": "View an autolink reference",
+                "flags": [
+                  {
+                    "names": [
+                      "-q",
+                      "--jq"
+                    ],
+                    "arg": "expression",
+                    "description": "Filter JSON output using a jq expression"
+                  },
+                  {
+                    "names": [
+                      "--json"
+                    ],
+                    "arg": "fields",
+                    "repeatable": true,
+                    "description": "Output JSON with the specified fields"
+                  },
+                  {
+                    "names": [
+                      "-t",
+                      "--template"
+                    ],
+                    "arg": "string",
+                    "description": "Format JSON output using a Go template; see \"gh help formatting\""
+                  },
+                  {
+                    "names": [
+                      "-R",
+                      "--repo"
+                    ],
+                    "arg": "[HOST/]OWNER/REPO",
+                    "description": "Select another repository using the [HOST/]OWNER/REPO format"
+                  }
+                ],
+                "subcommands": []
+              }
+            ]
           },
           {
             "name": "clone",
@@ -4745,7 +4991,92 @@
                 "description": "Select another repository using the [HOST/]OWNER/REPO format"
               }
             ],
-            "subcommands": []
+            "subcommands": [
+              {
+                "name": "add",
+                "description": "Add a deploy key to a GitHub repository",
+                "flags": [
+                  {
+                    "names": [
+                      "-w",
+                      "--allow-write"
+                    ],
+                    "description": "Allow write access for the key"
+                  },
+                  {
+                    "names": [
+                      "-t",
+                      "--title"
+                    ],
+                    "arg": "string",
+                    "description": "Title of the new key"
+                  },
+                  {
+                    "names": [
+                      "-R",
+                      "--repo"
+                    ],
+                    "arg": "[HOST/]OWNER/REPO",
+                    "description": "Select another repository using the [HOST/]OWNER/REPO format"
+                  }
+                ],
+                "subcommands": []
+              },
+              {
+                "name": "delete",
+                "description": "Delete a deploy key from a GitHub repository",
+                "flags": [
+                  {
+                    "names": [
+                      "-R",
+                      "--repo"
+                    ],
+                    "arg": "[HOST/]OWNER/REPO",
+                    "description": "Select another repository using the [HOST/]OWNER/REPO format"
+                  }
+                ],
+                "subcommands": []
+              },
+              {
+                "name": "list",
+                "description": "List deploy keys in a GitHub repository",
+                "flags": [
+                  {
+                    "names": [
+                      "-q",
+                      "--jq"
+                    ],
+                    "arg": "expression",
+                    "description": "Filter JSON output using a jq expression"
+                  },
+                  {
+                    "names": [
+                      "--json"
+                    ],
+                    "arg": "fields",
+                    "repeatable": true,
+                    "description": "Output JSON with the specified fields"
+                  },
+                  {
+                    "names": [
+                      "-t",
+                      "--template"
+                    ],
+                    "arg": "string",
+                    "description": "Format JSON output using a Go template; see \"gh help formatting\""
+                  },
+                  {
+                    "names": [
+                      "-R",
+                      "--repo"
+                    ],
+                    "arg": "[HOST/]OWNER/REPO",
+                    "description": "Select another repository using the [HOST/]OWNER/REPO format"
+                  }
+                ],
+                "subcommands": []
+              }
+            ]
           },
           {
             "name": "edit",
@@ -4866,6 +5197,13 @@
               },
               {
                 "names": [
+                  "--homepage"
+                ],
+                "arg": "URL",
+                "description": "Repository home page URL"
+              },
+              {
+                "names": [
                   "--remove-topic"
                 ],
                 "arg": "strings",
@@ -4945,13 +5283,47 @@
             "name": "gitignore",
             "description": "List and view available repository gitignore templates",
             "flags": [],
-            "subcommands": []
+            "subcommands": [
+              {
+                "name": "list",
+                "description": "List available repository gitignore templates",
+                "flags": [],
+                "subcommands": []
+              },
+              {
+                "name": "view",
+                "description": "View an available repository gitignore template",
+                "flags": [],
+                "subcommands": []
+              }
+            ]
           },
           {
             "name": "license",
             "description": "Explore repository licenses",
             "flags": [],
-            "subcommands": []
+            "subcommands": [
+              {
+                "name": "list",
+                "description": "List common repository licenses",
+                "flags": [],
+                "subcommands": []
+              },
+              {
+                "name": "view",
+                "description": "View a specific repository license",
+                "flags": [
+                  {
+                    "names": [
+                      "-w",
+                      "--web"
+                    ],
+                    "description": "Open https://choosealicense.com/ in the browser"
+                  }
+                ],
+                "subcommands": []
+              }
+            ]
           },
           {
             "name": "rename",
@@ -5319,7 +5691,7 @@
               },
               {
                 "names": [
-                  "--succeed-on-no-caches --all"
+                  "--succeed-on-no-caches"
                 ],
                 "description": "Return exit code 0 if no caches found. Must be used in conjunction with --all"
               },
@@ -6604,19 +6976,43 @@
           {
             "name": "get",
             "description": "Print the value of a given configuration key",
-            "flags": [],
+            "flags": [
+              {
+                "names": [
+                  "--host"
+                ],
+                "arg": "string",
+                "description": "Get per-host setting"
+              }
+            ],
             "subcommands": []
           },
           {
             "name": "list",
             "description": "Print a list of configuration keys and values",
-            "flags": [],
+            "flags": [
+              {
+                "names": [
+                  "--host"
+                ],
+                "arg": "string",
+                "description": "Get per-host configuration"
+              }
+            ],
             "subcommands": []
           },
           {
             "name": "set",
             "description": "Update configuration with a value for the given key",
-            "flags": [],
+            "flags": [
+              {
+                "names": [
+                  "--host"
+                ],
+                "arg": "string",
+                "description": "Set per-host setting"
+              }
+            ],
             "subcommands": []
           }
         ]

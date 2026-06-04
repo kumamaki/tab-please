@@ -62,10 +62,17 @@ only. Same generator, lower fidelity.
 completion and `generator/scan.ts` classifies each (add / ships-its-own / low
 value). The `$_comps` read must stay shell-side — bun can't see it.
 
+`tab-please request <tool>` files a "please curate this" GitHub issue (repo =
+`$TAB_PLEASE_REPO` || `kumamaki/tab-please`), via `gh` if authed else a pre-filled
+issue URL. It refuses curated/self-generating/flat tools (`--force` overrides;
+`--dry-run` files nothing). The verdict logic lives in `generator/classify.ts`
+(`classify` / `selfGenerates` / `runHelp` / `toolVersion`), shared by both `scan`
+and `request` — don't duplicate it back into either.
+
 ## Layout
 
 ```
-generator/         parse.ts (driver: detect format + recurse) · build.ts (emitter) · regen.ts · scan.ts · types.ts
+generator/         parse.ts (detect+recurse) · build.ts (emitter) · regen.ts · scan.ts · request.ts · classify.ts · types.ts
 generator/parsers/ commander · yargs · cobra · clap · click · argparse · generic · shared.ts
 tools/<cmd>/       generated.json · enrich.ts · helpers.zsh
 dist/              _<cmd>                  published artifacts (committed)

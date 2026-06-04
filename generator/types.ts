@@ -1,11 +1,11 @@
 // Shared data model for tab-please.
 //
 // The pipeline is:  cmd --help ──parse──▶ generated.json ─┐
-//                   tools/<x>/enrich.yml ─────────────────┼─merge─▶ Spec ─build─▶ dist/_<x>
+//                   tools/<x>/enrich.ts ──────────────────┼─merge─▶ Spec ─build─▶ dist/_<x>
 //                   tools/<x>/helpers.zsh ────────────────┘
 //
 // `generated.json` is a faithful, never-hand-edited dump of the CLI's --help
-// tree. `enrich.yml` is the human layer: value actions, choice sets help can't
+// tree. `enrich.ts` is the human layer: value actions, choice sets help can't
 // express, dynamic-helper bindings, and alias hints. The merge is by command
 // PATH + flag/positional KEY, so enrichment survives regeneration — a new
 // subcommand from --help shows up automatically, keeping its boolean flags,
@@ -83,7 +83,7 @@ export interface Adapter {
 }
 
 /**
- * Human enrichment layer (tools/<x>/enrich.yml).
+ * Human enrichment layer (tools/<x>/enrich.ts).
  *
  * `actions` keys are `"<command path>::<selector>"`:
  *   - command path is space-joined subcommands; the root command is "" (empty).

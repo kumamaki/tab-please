@@ -15,56 +15,7 @@
 // A pretty report goes to stderr; the bare "worth adding" names go to stdout so
 // the shell can offer `tab-please scan --add`.
 
-import { execFile } from "node:child_process";
-import { tmpdir } from "node:os";
-import { promisify } from "node:util";
-import { detectAdapter } from "./parse.ts";
-
-const pexec = promisify(execFile);
-// Probe unknown tools from a throwaway cwd: a tool that misreads `completion` as
-// an output path (some do) litters there, not the user's working directory.
-const SAFE = { maxBuffer: 8 * 1024 * 1024, cwd: tmpdir() } as const;
-
-async function runHelp(cmd: string): Promise<string> {
-  try {
-    const { stdout, stderr } = await pexec(cmd, ["--help"], SAFE);
-    return stdout.trim() ? stdout : stderr;
-  } catch (err: any) {
-    return String(err?.stdout || err?.stderr || "");
-  }
-}
-
-// Does the tool emit its own zsh completion? (clap_complete, cobra, …)
-async function selfGenerates(cmd: string): Promise<string | null> {
-  for (const args of [["completion", "zsh"], ["gen-completion", "zsh"], ["completions", "zsh"]]) {
-    try {
-      const { stdout } = await pexec(cmd, args, SAFE);
-      if (/#compdef\b/.test(stdout)) return `${cmd} ${args.join(" ")}`;
-    } catch {
-      /* try the next spelling */
-    }
-  }
-  return null;
-}
-
-type Verdict = { cmd: string; kind: "add" | "native" | "low"; detail: string };
-
-async function classify(cmd: string): Promise<Verdict> {
-  const native = await selfGenerates(cmd);
-  if (native) return { cmd, kind: "native", detail: native };
-
-  const help = await runHelp(cmd);
-  if (!help.trim()) return { cmd, kind: "low", detail: "no parseable --help" };
-
-  const adapter = await detectAdapter(help);
-  const page = adapter.parsePage(help);
-  // A completion earns its keep with a subcommand tree or a real flag set;
-  // a flat tool with a couple of flags is what zsh's _files default already covers.
-  if (page.subcommands.length >= 1 || page.flags.length >= 5) {
-    return { cmd, kind: "add", detail: `${adapter.name}: ${page.subcommands.length} subcommands, ${page.flags.length} flags` };
-  }
-  return { cmd, kind: "low", detail: `flat (${adapter.name})` };
-}
+import { classify } from "./classify.ts";
 
 const cmds = process.argv.slice(2).filter((c) => c && !c.startsWith("-"));
 if (!cmds.length) {

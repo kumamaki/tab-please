@@ -39,16 +39,21 @@ function classifyHeader(line: string): "Commands" | "Options" | "Usage" | "Other
   else if (/^[A-Z][A-Z ]+[A-Z]$/.test(raw.trim())) title = raw.trim();
   if (title === null) return null;
 
-  const t = title.toLowerCase();
-  if (/^usage$/.test(t)) return "Usage";
-  // Flags / Options buckets first (so "Help Topics" / "Learn More" don't get
-  // mis-bucketed and a stray "options" header is caught): Flags, Global Flags,
-  // Inherited Flags, Persistent Flags, Options, Global Options.
-  if (/\b(flags|options)\b/.test(t)) return "Options";
-  // Any "…command(s)…" header → Commands. kubectl parenthesises the level
-  // (`Basic Commands (Beginner)`), so match the word, not an end-anchor.
-  // gh's "HELP TOPICS" is intentionally not a command group → Other.
-  if (/\bcommands?\b/.test(t) || /^subcommands\b/.test(t)) return "Commands";
+  if (/^usage$/i.test(title)) return "Usage";
+  // Match the section keyword CASE-SENSITIVELY for mixed-case (colon) headers:
+  // real cobra headers capitalize the keyword ("Global Flags", "Available
+  // Commands", kubectl's "Subcommands provided by plugins"), but a prose
+  // sentence that merely ends in a colon ("The command requires either:") uses a
+  // lowercase keyword — case-sensitivity sends it to Other (ignored) instead of
+  // letting it swallow the following prose lines as junk subcommands. gh's fully
+  // UPPERCASE headers are vetted by the all-caps branch, so match those loosely.
+  const isUpper = /^[A-Z0-9 ()-]+$/.test(title);
+  const has = (word: string) => new RegExp(`\\b${word}\\b`, isUpper ? "i" : "").test(title);
+  // Flags / Options first so "Help Topics" / "Learn More" don't get mis-bucketed.
+  if (has("Flags") || has("Options")) return "Options";
+  // Any "…Commands…" / "Subcommands…" header (kubectl parenthesises the level,
+  // `Basic Commands (Beginner)`, so match the word, not an end-anchor).
+  if (has("Commands?") || has("Subcommands")) return "Commands";
   // Everything else (Examples, Help Topics, Aliases, Arguments, Learn More…).
   return "Other";
 }
@@ -164,9 +169,21 @@ function parseFlag(entry: string[]): CliFlag | null {
 // shows aliases on a separate `Aliases:` line, not inline, so the token is just
 // the name.
 function parseSubRef(entry: string[]): SubRef | null {
-  const [signature, firstDesc] = splitHeadDesc(entry[0]);
-  let token = signature.split(/\s+/)[0];
-  token = token.replace(/[:*]+$/, ""); // gh's `login:`, docker's `buildx*`.
+  // gh's colon dialect (`name:  Description`) column-aligns the description, and
+  // the gap collapses to a single space for the longest name (`update-branch:
+  // Update…`). splitHeadDesc only breaks on 2+ spaces, so it would swallow that
+  // row's description; key off the colon when present to recover it. (Trailing
+  // `*` is docker's plugin marker — `buildx*`.)
+  const colon = entry[0].match(/^([a-z][a-z0-9-]*):\s+(\S.*)$/);
+  let token: string;
+  let firstDesc: string;
+  if (colon) {
+    token = colon[1];
+    firstDesc = colon[2];
+  } else {
+    [token, firstDesc] = splitHeadDesc(entry[0]);
+    token = token.split(/\s+/)[0].replace(/[:*]+$/, "");
+  }
   if (!token || !isCommandToken(token)) return null;
   return { name: token, aliases: [], description: joinDesc(entry, firstDesc) };
 }

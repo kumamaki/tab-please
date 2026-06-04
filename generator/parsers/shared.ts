@@ -91,7 +91,14 @@ export function makeFlag(
   description: string,
   opts: { arg?: string; optional?: boolean; repeatable?: boolean; choices?: string[] } = {},
 ): CliFlag | null {
-  const cleaned = names.map((n) => n.trim()).filter((n) => n.startsWith("-"));
+  // An option name is always a single token. Some tools print a *related* flag
+  // inside the name column (gh: `-f, --force --hostname`, `--succeed-on-no-caches
+  // --all`), which comma-splitting alone leaves glued to a name with a space —
+  // emitting an invalid zsh spec. Reduce every name to its first token, and drop
+  // duplicates the reduction may create.
+  const cleaned = [
+    ...new Set(names.map((n) => n.trim().split(/\s+/)[0]).filter((n) => n.startsWith("-"))),
+  ];
   if (cleaned.length === 0) return null;
   return {
     names: cleaned,
@@ -108,7 +115,18 @@ export function isCommandToken(token: string): boolean {
   return /^[a-z][a-z0-9-]*(\|[a-z][a-z0-9-]*)*$/.test(token);
 }
 
-/** Drop the -h/--help flag — completions add their own. */
+/**
+ * Drop the help flag — completions inject their own `-h`/`--help`. Match on
+ * `--help` (or a flag spelled *only* `-h`); when `-h` is reused as a real
+ * short option (gh's `-h, --hostname`), keep the flag but strip the `-h`
+ * spelling so it can't collide with the injected help spec.
+ */
 export function withoutHelp(flags: CliFlag[]): CliFlag[] {
-  return flags.filter((f) => !f.names.includes("-h") && !f.names.includes("--help"));
+  const out: CliFlag[] = [];
+  for (const f of flags) {
+    if (f.names.includes("--help")) continue;
+    if (f.names.length === 1 && f.names[0] === "-h") continue;
+    out.push(f.names.includes("-h") ? { ...f, names: f.names.filter((n) => n !== "-h") } : f);
+  }
+  return out;
 }

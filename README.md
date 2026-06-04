@@ -65,6 +65,10 @@ brew tap kumamaki/tap
 brew install tab-please
 ```
 
+> Homebrew installs the **curated completions only** (`dist/_*`). The on-demand
+> commands — `tab-please add` / `scan` / `request` — and the fzf-tab preview live
+> in the zsh plugin; install via a plugin manager (above) for those.
+
 **Bare** (no manager): clone, then in `~/.zshrc` before `compinit`:
 
 ```zsh
@@ -142,12 +146,30 @@ own** (enable the tool's native completion — better than a generated one), or
 installed tools (`brew leaves`, `~/.cargo/bin`, `pipx`), not every binary on
 `PATH`, and skips anything that already completes.
 
+### `tab-please request <tool>` — ask for a tool to be curated
+
+Want a tool in the *curated* set (enriched, shipped, kept fresh) rather than
+generated locally? File a request — it vets the tool, attaches context (format,
+version, parse stats), and opens a GitHub issue (via `gh` if you have it, else a
+pre-filled URL — no token needed):
+
+```zsh
+tab-please request overmind     # → issue with format + version + subcommand/flag counts
+tab-please request gemini       # ✗ refused: already curated
+tab-please request kubectl      # ✗ refused: ships its own completion — enable that instead
+```
+
+It won't file noise: curated tools, self-generators, and flat one-shots are
+turned away with a reason. `--force` overrides; `--dry-run` shows the issue
+without filing.
+
 ### Configuration
 
 | Env var | Default | Effect |
 |---------|---------|--------|
 | `TAB_PLEASE_USER_DIR` | `~/.local/share/tab-please/completions` | where `tab-please add` writes |
 | `TAB_PLEASE_FZF_PREVIEW` | `1` | set `0` to disable the fzf-tab `--help` preview |
+| `TAB_PLEASE_REPO` | `kumamaki/tab-please` | repo `tab-please request` files issues against |
 
 tab-please **appends** to `fpath`, so any tool's own completion (gh's dynamic
 one, docker's, …) always wins — it only fills gaps.

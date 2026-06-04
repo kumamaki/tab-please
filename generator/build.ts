@@ -82,15 +82,23 @@ function dispatchPattern(sub: CliCommand): string {
 }
 
 /** Emit one command (and recurse). Returns an array of complete zsh function blocks. */
-function emitCommand(cmd: CliCommand, path: string[], actions: Record<string, string>): string[] {
+function emitCommand(
+  cmd: CliCommand,
+  path: string[],
+  actions: Record<string, string>,
+  hide: Set<string>,
+): string[] {
   const blocks: string[] = [];
   const f = fnName(path);
   const flagSpecs = cmd.flags.map((fl) => flagSpec(path, fl, actions));
 
-  if (cmd.subcommands.length > 0) {
+  // Drop subcommands the enrichment hides (deprecated/internal), by path key.
+  const subcommands = cmd.subcommands.filter((s) => !hide.has(pathKey([...path, s.name])));
+
+  if (subcommands.length > 0) {
     // Container: state machine over subcommands.
     const argSpecs = [...flagSpecs, HELP_SPEC, `'1: :${f}_commands'`, `'*::arg:->args'`];
-    const dispatch = cmd.subcommands
+    const dispatch = subcommands
       .map((s) => `        ${dispatchPattern(s)}) ${fnName([...path, s.name])} ;;`)
       .join("\n");
     blocks.push(
@@ -109,7 +117,7 @@ function emitCommand(cmd: CliCommand, path: string[], actions: Record<string, st
 
     // Subcommand list function.
     const items = [
-      ...cmd.subcommands.map((s) => `    '${s.name}:${esc(s.description)}'`),
+      ...subcommands.map((s) => `    '${s.name}:${esc(s.description)}'`),
       `    'help:Display help for command'`,
     ].join("\n");
     blocks.push(
@@ -119,8 +127,8 @@ function emitCommand(cmd: CliCommand, path: string[], actions: Record<string, st
         `}`,
     );
 
-    for (const sub of cmd.subcommands) {
-      blocks.push(...emitCommand(sub, [...path, sub.name], actions));
+    for (const sub of subcommands) {
+      blocks.push(...emitCommand(sub, [...path, sub.name], actions, hide));
     }
   } else {
     // Leaf: flags + positionals.
@@ -166,7 +174,9 @@ async function main() {
   }
 
   const cmd = model.command;
-  const blocks = emitCommand(model.root, [cmd], actions);
+  const hide = new Set(enrich.hide ?? []);
+  const blocks = emitCommand(model.root, [cmd], actions, hide);
+  const rootFn = fnName([cmd]);
 
   const header =
     `#compdef ${cmd}\n` +
@@ -174,11 +184,14 @@ async function main() {
     `# Do not edit by hand: regenerate with \`bun generator/build.ts ${cmd}\`.\n` +
     `# Enrichment (value actions, dynamic helpers) lives in tools/${cmd}/.`;
 
+  // Use the sanitized fn name (not `_${cmd}`) so a command whose name carries
+  // punctuation fnName rewrites (e.g. a dot) still resolves to the defined
+  // function; the `#compdef`/compdef target stays the real command name.
   const footer =
-    `if [[ $funcstack[1] = _${cmd} ]]; then\n` +
-    `  _${cmd} "$@"\n` +
+    `if [[ $funcstack[1] = ${rootFn} ]]; then\n` +
+    `  ${rootFn} "$@"\n` +
     `elif (( $+functions[compdef] )); then\n` +
-    `  compdef _${cmd} ${cmd}\n` +
+    `  compdef ${rootFn} ${cmd}\n` +
     `fi`;
 
   const parts = [header, helpers, blocks.join("\n\n"), footer].filter(Boolean);

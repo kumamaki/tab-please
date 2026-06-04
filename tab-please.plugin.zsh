@@ -10,6 +10,9 @@ typeset -g _TAB_PLEASE_DIR=${0:A:h}
 
 # Curated completions ship in dist/; on-demand ones (`tab-please add`) land in a
 # writable user dir. Both APPEND to fpath so a tool's own completion still wins.
+# Keep fpath unique so re-sourcing or repeated `tab-please add` can't grow it
+# with duplicate entries.
+typeset -gU fpath
 typeset -g _TAB_PLEASE_USER_DIR=${TAB_PLEASE_USER_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/tab-please/completions}
 fpath=($fpath "${_TAB_PLEASE_DIR}/dist" "${_TAB_PLEASE_USER_DIR}")
 
@@ -94,10 +97,15 @@ tab-please() {
         for c in ${(f)add}; do tab-please add "$c"; done
       fi
       ;;
+    request)
+      (( $+commands[bun] )) || { print -u2 "tab-please: needs 'bun' on PATH"; return 1 }
+      bun "$_TAB_PLEASE_DIR/generator/request.ts" "$@"
+      ;;
     *)
       print -u2 "usage: tab-please <command>
   add <tool> [--format <name>]   generate a completion for an installed CLI
-  scan [--add]                   find installed tools with no completion"
+  scan [--add]                   find installed tools with no completion
+  request <tool> [--force]       ask for a tool to be curated (files a GitHub issue)"
       return 1
       ;;
   esac

@@ -128,6 +128,7 @@ _gh_auth_login() {
   _arguments \
     '(-c --clipboard)'{-c,--clipboard}'[Copy one-time OAuth device code to clipboard]' \
     '(-p --git-protocol)'{-p,--git-protocol}'[The protocol to use for git operations on this host: {ssh|https}]:string:' \
+    '(--hostname)--hostname[The hostname of the GitHub instance to authenticate with]:string:' \
     '(--insecure-storage)--insecure-storage[Save authentication credentials in plain text instead of credential store]' \
     '*'{-s,--scopes}'[Additional authentication scopes to request]:strings:' \
     '(--skip-ssh-key)--skip-ssh-key[Skip generate/upload SSH key prompt]' \
@@ -138,6 +139,7 @@ _gh_auth_login() {
 
 _gh_auth_logout() {
   _arguments \
+    '(--hostname)--hostname[The hostname of the GitHub instance to log out of]:string:' \
     '(-u --user)'{-u,--user}'[The account to log out of]:string:' \
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
@@ -145,6 +147,7 @@ _gh_auth_logout() {
 _gh_auth_refresh() {
   _arguments \
     '(-c --clipboard)'{-c,--clipboard}'[Copy one-time OAuth device code to clipboard]' \
+    '(--hostname)--hostname[The GitHub host to use for authentication]:string:' \
     '(--insecure-storage)--insecure-storage[Save authentication credentials in plain text instead of credential store]' \
     '*'{-r,--remove-scopes}'[Authentication scopes to remove from gh]:strings:' \
     '(--reset-scopes)--reset-scopes[Reset authentication scopes to the default minimum set of scopes]' \
@@ -154,13 +157,15 @@ _gh_auth_refresh() {
 
 _gh_auth_setup-git() {
   _arguments \
-    '(-f --force --hostname)'{-f,--force --hostname}'[Force setup even if the host is not known. Must be used in conjunction with --hostname]' \
+    '(-f --force)'{-f,--force}'[Force setup even if the host is not known. Must be used in conjunction with --hostname]' \
+    '(--hostname)--hostname[The hostname to configure git for]:string:' \
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
 _gh_auth_status() {
   _arguments \
     '(-a --active)'{-a,--active}'[Display the active account only]' \
+    '(--hostname)--hostname[Check only a specific hostnames auth status]:string:' \
     '(--jq)--jq[Filter JSON output using a jq expression]:expression:' \
     '*--json[Output JSON with the specified fields]:fields:' \
     '(-t --show-token)'{-t,--show-token}'[Display the auth token]' \
@@ -170,12 +175,14 @@ _gh_auth_status() {
 
 _gh_auth_switch() {
   _arguments \
+    '(--hostname)--hostname[The hostname of the GitHub instance to switch account for]:string:' \
     '(-u --user)'{-u,--user}'[The account to switch to]:string:' \
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
 _gh_auth_token() {
   _arguments \
+    '(--hostname)--hostname[The hostname of the GitHub instance authenticated with]:string:' \
     '(-u --user)'{-u,--user}'[The account to output the token for]:string:' \
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
@@ -333,13 +340,49 @@ _gh_codespace_logs() {
 }
 
 _gh_codespace_ports() {
-  _arguments \
+  local curcontext="$curcontext" state line
+  _arguments -C \
     '(-c --codespace)'{-c,--codespace}'[Name of the codespace]:string:' \
     '(-q --jq)'{-q,--jq}'[Filter JSON output using a jq expression]:expression:' \
     '*--json[Output JSON with the specified fields]:fields:' \
     '(-R --repo)'{-R,--repo}'[Filter codespace selection by repository name (user/repo)]:string:' \
     '(--repo-owner)--repo-owner[Filter codespace selection by repository owner (username or org)]:string:' \
     '(-t --template)'{-t,--template}'[Format JSON output using a Go template; see "gh help formatting"]:string:' \
+    '(-h --help)'{-h,--help}'[Display help for command]' \
+    '1: :_gh_codespace_ports_commands' \
+    '*::arg:->args'
+  case $state in
+    args)
+      case $line[1] in
+        forward) _gh_codespace_ports_forward ;;
+        visibility) _gh_codespace_ports_visibility ;;
+      esac
+      ;;
+  esac
+}
+
+_gh_codespace_ports_commands() {
+  local -a _c=(
+    'forward:Forward ports'
+    'visibility:Change the visibility of the forwarded port'
+    'help:Display help for command'
+  )
+  _describe -t commands 'ports command' _c
+}
+
+_gh_codespace_ports_forward() {
+  _arguments \
+    '(-c --codespace)'{-c,--codespace}'[Name of the codespace]:string:' \
+    '(-R --repo)'{-R,--repo}'[Filter codespace selection by repository name (user/repo)]:string:' \
+    '(--repo-owner)--repo-owner[Filter codespace selection by repository owner (username or org)]:string:' \
+    '(-h --help)'{-h,--help}'[Display help for command]'
+}
+
+_gh_codespace_ports_visibility() {
+  _arguments \
+    '(-c --codespace)'{-c,--codespace}'[Name of the codespace]:string:' \
+    '(-R --repo)'{-R,--repo}'[Filter codespace selection by repository name (user/repo)]:string:' \
+    '(--repo-owner)--repo-owner[Filter codespace selection by repository owner (username or org)]:string:' \
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
@@ -758,7 +801,7 @@ _gh_pr_commands() {
     'revert:Revert a pull request'
     'review:Add a review to a pull request'
     'unlock:Unlock pull request conversation'
-    'update-branch:'
+    'update-branch:Update a pull request branch'
     'view:View a pull request'
     'help:Display help for command'
   )
@@ -1033,7 +1076,7 @@ _gh_project_commands() {
     'item-list:List the items in a project'
     'link:Link a project to a repository or a team'
     'list:List the projects for an owner'
-    'mark-template:'
+    'mark-template:Mark a project as a template'
     'unlink:Unlink a project from a repository or a team'
     'view:View a project'
     'help:Display help for command'
@@ -1459,6 +1502,7 @@ _gh_repo_create() {
     '(--disable-issues)--disable-issues[Disable issues in the new repository]' \
     '(--disable-wiki)--disable-wiki[Disable wiki in the new repository]' \
     '(-g --gitignore)'{-g,--gitignore}'[Specify a gitignore template for the repository]:string:' \
+    '(--homepage)--homepage[Repository home page URL]:URL:' \
     '(--include-all-branches)--include-all-branches[Include all branches from template repository]' \
     '(--internal)--internal[Make the new repository internal]' \
     '(-l --license)'{-l,--license}'[Specify an Open Source License for the repository]:string:' \
@@ -1495,7 +1539,64 @@ _gh_repo_archive() {
 }
 
 _gh_repo_autolink() {
+  local curcontext="$curcontext" state line
+  _arguments -C \
+    '(-R --repo)'{-R,--repo}'[Select another repository using the HOST/OWNER/REPO format]:[HOST/]OWNER/REPO:' \
+    '(-h --help)'{-h,--help}'[Display help for command]' \
+    '1: :_gh_repo_autolink_commands' \
+    '*::arg:->args'
+  case $state in
+    args)
+      case $line[1] in
+        create) _gh_repo_autolink_create ;;
+        delete) _gh_repo_autolink_delete ;;
+        list) _gh_repo_autolink_list ;;
+        view) _gh_repo_autolink_view ;;
+      esac
+      ;;
+  esac
+}
+
+_gh_repo_autolink_commands() {
+  local -a _c=(
+    'create:Create a new autolink reference'
+    'delete:Delete an autolink reference'
+    'list:List autolink references for a GitHub repository'
+    'view:View an autolink reference'
+    'help:Display help for command'
+  )
+  _describe -t commands 'autolink command' _c
+}
+
+_gh_repo_autolink_create() {
   _arguments \
+    '(-n --numeric)'{-n,--numeric}'[Mark autolink as numeric]' \
+    '(-R --repo)'{-R,--repo}'[Select another repository using the HOST/OWNER/REPO format]:[HOST/]OWNER/REPO:' \
+    '(-h --help)'{-h,--help}'[Display help for command]'
+}
+
+_gh_repo_autolink_delete() {
+  _arguments \
+    '(--yes)--yes[Confirm deletion without prompting]' \
+    '(-R --repo)'{-R,--repo}'[Select another repository using the HOST/OWNER/REPO format]:[HOST/]OWNER/REPO:' \
+    '(-h --help)'{-h,--help}'[Display help for command]'
+}
+
+_gh_repo_autolink_list() {
+  _arguments \
+    '(-q --jq)'{-q,--jq}'[Filter JSON output using a jq expression]:expression:' \
+    '*--json[Output JSON with the specified fields]:fields:' \
+    '(-t --template)'{-t,--template}'[Format JSON output using a Go template; see "gh help formatting"]:string:' \
+    '(-w --web)'{-w,--web}'[List autolink references in the web browser]' \
+    '(-R --repo)'{-R,--repo}'[Select another repository using the HOST/OWNER/REPO format]:[HOST/]OWNER/REPO:' \
+    '(-h --help)'{-h,--help}'[Display help for command]'
+}
+
+_gh_repo_autolink_view() {
+  _arguments \
+    '(-q --jq)'{-q,--jq}'[Filter JSON output using a jq expression]:expression:' \
+    '*--json[Output JSON with the specified fields]:fields:' \
+    '(-t --template)'{-t,--template}'[Format JSON output using a Go template; see "gh help formatting"]:string:' \
     '(-R --repo)'{-R,--repo}'[Select another repository using the HOST/OWNER/REPO format]:[HOST/]OWNER/REPO:' \
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
@@ -1514,7 +1615,52 @@ _gh_repo_delete() {
 }
 
 _gh_repo_deploy-key() {
+  local curcontext="$curcontext" state line
+  _arguments -C \
+    '(-R --repo)'{-R,--repo}'[Select another repository using the HOST/OWNER/REPO format]:[HOST/]OWNER/REPO:' \
+    '(-h --help)'{-h,--help}'[Display help for command]' \
+    '1: :_gh_repo_deploy-key_commands' \
+    '*::arg:->args'
+  case $state in
+    args)
+      case $line[1] in
+        add) _gh_repo_deploy-key_add ;;
+        delete) _gh_repo_deploy-key_delete ;;
+        list) _gh_repo_deploy-key_list ;;
+      esac
+      ;;
+  esac
+}
+
+_gh_repo_deploy-key_commands() {
+  local -a _c=(
+    'add:Add a deploy key to a GitHub repository'
+    'delete:Delete a deploy key from a GitHub repository'
+    'list:List deploy keys in a GitHub repository'
+    'help:Display help for command'
+  )
+  _describe -t commands 'deploy-key command' _c
+}
+
+_gh_repo_deploy-key_add() {
   _arguments \
+    '(-w --allow-write)'{-w,--allow-write}'[Allow write access for the key]' \
+    '(-t --title)'{-t,--title}'[Title of the new key]:string:' \
+    '(-R --repo)'{-R,--repo}'[Select another repository using the HOST/OWNER/REPO format]:[HOST/]OWNER/REPO:' \
+    '(-h --help)'{-h,--help}'[Display help for command]'
+}
+
+_gh_repo_deploy-key_delete() {
+  _arguments \
+    '(-R --repo)'{-R,--repo}'[Select another repository using the HOST/OWNER/REPO format]:[HOST/]OWNER/REPO:' \
+    '(-h --help)'{-h,--help}'[Display help for command]'
+}
+
+_gh_repo_deploy-key_list() {
+  _arguments \
+    '(-q --jq)'{-q,--jq}'[Filter JSON output using a jq expression]:expression:' \
+    '*--json[Output JSON with the specified fields]:fields:' \
+    '(-t --template)'{-t,--template}'[Format JSON output using a Go template; see "gh help formatting"]:string:' \
     '(-R --repo)'{-R,--repo}'[Select another repository using the HOST/OWNER/REPO format]:[HOST/]OWNER/REPO:' \
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
@@ -1539,6 +1685,7 @@ _gh_repo_edit() {
     '(--enable-secret-scanning-push-protection)--enable-secret-scanning-push-protection[Enable secret scanning push protection in the repository. Secret scanning must be enabled first]' \
     '(--enable-squash-merge)--enable-squash-merge[Enable merging pull requests via squashed commit]' \
     '(--enable-wiki)--enable-wiki[Enable wiki in the repository]' \
+    '(--homepage)--homepage[Repository home page URL]:URL:' \
     '*--remove-topic[Remove repository topic]:strings:' \
     '(--squash-merge-commit-message)--squash-merge-commit-message[The default value for a squash merge commit message: {default|pr-title|pr-title-commits|pr-title-description}]:string:' \
     '(--template)--template[Make the repository available as a template repository]' \
@@ -1558,12 +1705,73 @@ _gh_repo_fork() {
 }
 
 _gh_repo_gitignore() {
+  local curcontext="$curcontext" state line
+  _arguments -C \
+    '(-h --help)'{-h,--help}'[Display help for command]' \
+    '1: :_gh_repo_gitignore_commands' \
+    '*::arg:->args'
+  case $state in
+    args)
+      case $line[1] in
+        list) _gh_repo_gitignore_list ;;
+        view) _gh_repo_gitignore_view ;;
+      esac
+      ;;
+  esac
+}
+
+_gh_repo_gitignore_commands() {
+  local -a _c=(
+    'list:List available repository gitignore templates'
+    'view:View an available repository gitignore template'
+    'help:Display help for command'
+  )
+  _describe -t commands 'gitignore command' _c
+}
+
+_gh_repo_gitignore_list() {
+  _arguments \
+    '(-h --help)'{-h,--help}'[Display help for command]'
+}
+
+_gh_repo_gitignore_view() {
   _arguments \
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
 _gh_repo_license() {
+  local curcontext="$curcontext" state line
+  _arguments -C \
+    '(-h --help)'{-h,--help}'[Display help for command]' \
+    '1: :_gh_repo_license_commands' \
+    '*::arg:->args'
+  case $state in
+    args)
+      case $line[1] in
+        list) _gh_repo_license_list ;;
+        view) _gh_repo_license_view ;;
+      esac
+      ;;
+  esac
+}
+
+_gh_repo_license_commands() {
+  local -a _c=(
+    'list:List common repository licenses'
+    'view:View a specific repository license'
+    'help:Display help for command'
+  )
+  _describe -t commands 'license command' _c
+}
+
+_gh_repo_license_list() {
   _arguments \
+    '(-h --help)'{-h,--help}'[Display help for command]'
+}
+
+_gh_repo_license_view() {
+  _arguments \
+    '(-w --web)'{-w,--web}'[Open https://choosealicense.com/ in the browser]' \
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
@@ -1714,7 +1922,7 @@ _gh_cache_delete() {
   _arguments \
     '(-a --all)'{-a,--all}'[Delete all caches, can be used with --ref to delete all caches for a specific ref]' \
     '(-r --ref)'{-r,--ref}'[Delete by cache key and ref, formatted as refs/heads/<branch name> or refs/pull/<number>/merge]:string:' \
-    '(--succeed-on-no-caches --all)--succeed-on-no-caches --all[Return exit code 0 if no caches found. Must be used in conjunction with --all]' \
+    '(--succeed-on-no-caches)--succeed-on-no-caches[Return exit code 0 if no caches found. Must be used in conjunction with --all]' \
     '(-R --repo)'{-R,--repo}'[Select another repository using the HOST/OWNER/REPO format]:[HOST/]OWNER/REPO:' \
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
@@ -2169,16 +2377,19 @@ _gh_config_clear-cache() {
 
 _gh_config_get() {
   _arguments \
+    '(--host)--host[Get per-host setting]:string:' \
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
 _gh_config_list() {
   _arguments \
+    '(--host)--host[Get per-host configuration]:string:' \
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
 _gh_config_set() {
   _arguments \
+    '(--host)--host[Set per-host setting]:string:' \
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
