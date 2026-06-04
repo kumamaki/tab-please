@@ -8,14 +8,17 @@
 0=${(%):-%N}
 typeset -g _TAB_PLEASE_DIR=${0:A:h}
 
-fpath=($fpath "${_TAB_PLEASE_DIR}/dist")
+# Curated completions ship in dist/; on-demand ones (`tab-please add`) land in a
+# writable user dir. Both APPEND to fpath so a tool's own completion still wins.
+typeset -g _TAB_PLEASE_USER_DIR=${TAB_PLEASE_USER_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/tab-please/completions}
+fpath=($fpath "${_TAB_PLEASE_DIR}/dist" "${_TAB_PLEASE_USER_DIR}")
 
-# Mark each shipped completion for autoload — but skip any name something else
-# already provides (e.g. `source <(gh completion -s zsh)`), so we never replace
-# a richer completion. Ours self-register via their guarded footer on init.
+# Mark each completion for autoload — but skip any name something else already
+# provides (e.g. `source <(gh completion -s zsh)`), so we never replace a richer
+# completion. Ours self-register via their guarded footer on init.
 () {
   local f
-  for f in "${_TAB_PLEASE_DIR}/dist"/_*(N:t); do
+  for f in "${_TAB_PLEASE_DIR}/dist"/_*(N:t) "${_TAB_PLEASE_USER_DIR}"/_*(N:t); do
     (( $+functions[$f] )) && continue
     autoload -Uz -- "$f"
   done
@@ -24,6 +27,81 @@ fpath=($fpath "${_TAB_PLEASE_DIR}/dist")
 # If compinit already ran (some managers init completions before sourcing
 # plugins), rescan so our additions take effect this session.
 (( $+functions[compinit] )) && compinit -C 2>/dev/null
+
+# `tab-please` — manage on-demand completions. On-demand ones are lower fidelity
+# than the curated tools (structure + flags + printed choices, but no enrichment:
+# no live/dynamic values, no value sets --help omits). Needs bun.
+#   add <tool> [--format <name>]   generate a completion for an installed CLI and
+#                                  load it into this shell now
+#   scan [--add]                   list installed tools with no completion and say
+#                                  what to do (add · enable native · skip); --add
+#                                  generates the worth-adding ones
+tab-please() {
+  emulate -L zsh
+  setopt local_options null_glob
+  local sub=$1; (( $# )) && shift
+  case $sub in
+    add)
+      local tool=$1; (( $# )) && shift
+      [[ -n $tool ]] || { print -u2 "usage: tab-please add <tool> [--format <name>]"; return 1 }
+      (( $+commands[$tool] )) || { print -u2 "tab-please: '$tool' is not an installed command"; return 1 }
+      (( $+commands[bun] ))   || { print -u2 "tab-please: needs 'bun' on PATH"; return 1 }
+      command mkdir -p -- "$_TAB_PLEASE_USER_DIR" || return 1
+      local model="$_TAB_PLEASE_USER_DIR/.${tool}.json"
+      if bun "$_TAB_PLEASE_DIR/generator/parse.ts" "$tool" "$@" --out "$model" &&
+         bun "$_TAB_PLEASE_DIR/generator/build.ts" "$tool" --from "$model" --out "$_TAB_PLEASE_USER_DIR/_${tool}"; then
+        fpath=($fpath "$_TAB_PLEASE_USER_DIR")
+        unfunction "_${tool}" 2>/dev/null
+        autoload -Uz "_${tool}"
+        (( $+functions[compdef] )) && compdef "_${tool}" "$tool"
+        print -r -- "tab-please: added '${tool}' → ${_TAB_PLEASE_USER_DIR}/_${tool} (active now)"
+      else
+        print -u2 "tab-please: failed to generate a completion for '${tool}'"; return 1
+      fi
+      ;;
+    scan)
+      (( $+commands[bun] )) || { print -u2 "tab-please: needs 'bun' on PATH"; return 1 }
+      # formula/alias name → real command, for the few that differ
+      local -A rename=(
+        ripgrep rg  cloudflare-wrangler wrangler  git-delta delta  tlrc tldr
+        netlify-cli netlify  gemini-cli gemini  protobuf protoc  ghostscript gs
+        smartmontools smartctl
+      )
+      # Intentionally-installed tools only (not every binary in PATH — that's noise).
+      local -a names=(
+        ${(f)"$(brew leaves 2>/dev/null)"}
+        ~/.cargo/bin/*(N.:t)
+        ${(f)"$(pipx list --short 2>/dev/null | awk '{print $1}')"}
+      )
+      local -a cand; local t cmd
+      for t in ${(u)names}; do
+        # drop cargo subcommand plugins and rust toolchain internals (not CLIs you complete)
+        [[ $t == (cargo-*|clippy-driver|rls|rust-analyzer|rust-gdb|rust-gdbgui|rust-lldb|rustc|rustdoc|rustfmt) ]] && continue
+        cmd=${rename[$t]:-$t}
+        (( $+commands[$cmd] )) || continue                                   # formula with no direct command
+        [[ -z ${_comps[$cmd]} || ${_comps[$cmd]} == (_default|_gnu_generic) ]] || continue   # already completes
+        cand+=$cmd
+      done
+      if (( ! $#cand )); then
+        print "tab-please: every installed tool already completes ✓"
+        return 0
+      fi
+      print -u2 "tab-please: ${#cand} installed tools have no completion — classifying…"
+      local add
+      add=$(bun "$_TAB_PLEASE_DIR/generator/scan.ts" ${(u)cand})
+      if [[ $1 == --add && -n $add ]]; then
+        local c
+        for c in ${(f)add}; do tab-please add "$c"; done
+      fi
+      ;;
+    *)
+      print -u2 "usage: tab-please <command>
+  add <tool> [--format <name>]   generate a completion for an installed CLI
+  scan [--add]                   find installed tools with no completion"
+      return 1
+      ;;
+  esac
+}
 
 # Optional fzf-tab integration: show a subcommand's --help in the preview pane.
 # Inert if you don't use fzf-tab; scoped to our tools so it won't touch your

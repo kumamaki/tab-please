@@ -59,6 +59,12 @@ const FIXTURES: Fixture[] = [
     { file: "root.txt", minSubs: 2, minFlags: 3 },
     { file: "run.txt", minSubs: 0, minFlags: 5 },
   ] },
+  // gemini is also shipped (dist/_gemini); the fixture doubles as the second
+  // yargs sample and guards the tool we generate.
+  { tool: "gemini", format: "yargs", pages: [
+    { file: "root.txt", minSubs: 3, minFlags: 15 },
+    { file: "mcp.txt", minSubs: 3, minFlags: 0 },
+  ] },
 ];
 
 const fixturePath = (tool: string, file: string) => resolve(import.meta.dir, "fixtures", tool, file);

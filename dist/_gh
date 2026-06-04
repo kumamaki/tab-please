@@ -28,21 +28,21 @@ _gh() {
         run) _gh_run ;;
         workflow) _gh_workflow ;;
         co) _gh_co ;;
-        agent-task) _gh_agent_task ;;
+        agent-task) _gh_agent-task ;;
         alias) _gh_alias ;;
         api) _gh_api ;;
         attestation) _gh_attestation ;;
         config) _gh_config ;;
         copilot) _gh_copilot ;;
         extension) _gh_extension ;;
-        gpg-key) _gh_gpg_key ;;
+        gpg-key) _gh_gpg-key ;;
         label) _gh_label ;;
         licenses) _gh_licenses ;;
         preview) _gh_preview ;;
         ruleset) _gh_ruleset ;;
         search) _gh_search ;;
         secret) _gh_secret ;;
-        ssh-key) _gh_ssh_key ;;
+        ssh-key) _gh_ssh-key ;;
         status) _gh_status ;;
         variable) _gh_variable ;;
       esac
@@ -101,7 +101,7 @@ _gh_auth() {
         login) _gh_auth_login ;;
         logout) _gh_auth_logout ;;
         refresh) _gh_auth_refresh ;;
-        setup-git) _gh_auth_setup_git ;;
+        setup-git) _gh_auth_setup-git ;;
         status) _gh_auth_status ;;
         switch) _gh_auth_switch ;;
         token) _gh_auth_token ;;
@@ -152,7 +152,7 @@ _gh_auth_refresh() {
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_gh_auth_setup_git() {
+_gh_auth_setup-git() {
   _arguments \
     '(-f --force --hostname)'{-f,--force --hostname}'[Force setup even if the host is not known. Must be used in conjunction with --hostname]' \
     '(-h --help)'{-h,--help}'[Display help for command]'
@@ -733,7 +733,7 @@ _gh_pr() {
         revert) _gh_pr_revert ;;
         review) _gh_pr_review ;;
         unlock) _gh_pr_unlock ;;
-        update-branch) _gh_pr_update_branch ;;
+        update-branch) _gh_pr_update-branch ;;
         view) _gh_pr_view ;;
       esac
       ;;
@@ -964,7 +964,7 @@ _gh_pr_unlock() {
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_gh_pr_update_branch() {
+_gh_pr_update-branch() {
   _arguments \
     '(--rebase)--rebase[Update PR branch by rebasing on top of latest base branch]' \
     '(-R --repo)'{-R,--repo}'[Select another repository using the HOST/OWNER/REPO format]:[HOST/]OWNER/REPO:' \
@@ -996,18 +996,18 @@ _gh_project() {
         create) _gh_project_create ;;
         delete) _gh_project_delete ;;
         edit) _gh_project_edit ;;
-        field-create) _gh_project_field_create ;;
-        field-delete) _gh_project_field_delete ;;
-        field-list) _gh_project_field_list ;;
-        item-add) _gh_project_item_add ;;
-        item-archive) _gh_project_item_archive ;;
-        item-create) _gh_project_item_create ;;
-        item-delete) _gh_project_item_delete ;;
-        item-edit) _gh_project_item_edit ;;
-        item-list) _gh_project_item_list ;;
+        field-create) _gh_project_field-create ;;
+        field-delete) _gh_project_field-delete ;;
+        field-list) _gh_project_field-list ;;
+        item-add) _gh_project_item-add ;;
+        item-archive) _gh_project_item-archive ;;
+        item-create) _gh_project_item-create ;;
+        item-delete) _gh_project_item-delete ;;
+        item-edit) _gh_project_item-edit ;;
+        item-list) _gh_project_item-list ;;
         link) _gh_project_link ;;
         list) _gh_project_list ;;
-        mark-template) _gh_project_mark_template ;;
+        mark-template) _gh_project_mark-template ;;
         unlink) _gh_project_unlink ;;
         view) _gh_project_view ;;
       esac
@@ -1095,7 +1095,7 @@ _gh_project_edit() {
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_gh_project_field_create() {
+_gh_project_field-create() {
   _arguments \
     '(--data-type)--data-type[DataType of the new field.: {TEXT|SINGLE_SELECT|DATE|NUMBER}]:string:' \
     '(--format)--format[Output format: {json}]:string:' \
@@ -1107,7 +1107,7 @@ _gh_project_field_create() {
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_gh_project_field_delete() {
+_gh_project_field-delete() {
   _arguments \
     '(--format)--format[Output format: {json}]:string:' \
     '(--id)--id[ID of the field to delete]:string:' \
@@ -1116,7 +1116,7 @@ _gh_project_field_delete() {
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_gh_project_field_list() {
+_gh_project_field-list() {
   _arguments \
     '(--format)--format[Output format: {json}]:string:' \
     '(-q --jq)'{-q,--jq}'[Filter JSON output using a jq expression]:expression:' \
@@ -1126,7 +1126,7 @@ _gh_project_field_list() {
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_gh_project_item_add() {
+_gh_project_item-add() {
   _arguments \
     '(--format)--format[Output format: {json}]:string:' \
     '(-q --jq)'{-q,--jq}'[Filter JSON output using a jq expression]:expression:' \
@@ -1136,7 +1136,7 @@ _gh_project_item_add() {
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_gh_project_item_archive() {
+_gh_project_item-archive() {
   _arguments \
     '(--format)--format[Output format: {json}]:string:' \
     '(--id)--id[ID of the item to archive]:string:' \
@@ -1147,7 +1147,7 @@ _gh_project_item_archive() {
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_gh_project_item_create() {
+_gh_project_item-create() {
   _arguments \
     '(--body)--body[Body for the draft issue]:string:' \
     '(--format)--format[Output format: {json}]:string:' \
@@ -1158,7 +1158,7 @@ _gh_project_item_create() {
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_gh_project_item_delete() {
+_gh_project_item-delete() {
   _arguments \
     '(--format)--format[Output format: {json}]:string:' \
     '(--id)--id[ID of the item to delete]:string:' \
@@ -1168,7 +1168,7 @@ _gh_project_item_delete() {
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_gh_project_item_edit() {
+_gh_project_item-edit() {
   _arguments \
     '(--body)--body[Body of the draft issue item]:string:' \
     '(--clear)--clear[Remove field value]' \
@@ -1187,7 +1187,7 @@ _gh_project_item_edit() {
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_gh_project_item_list() {
+_gh_project_item-list() {
   _arguments \
     '(--format)--format[Output format: {json}]:string:' \
     '(-q --jq)'{-q,--jq}'[Filter JSON output using a jq expression]:expression:' \
@@ -1218,7 +1218,7 @@ _gh_project_list() {
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_gh_project_mark_template() {
+_gh_project_mark-template() {
   _arguments \
     '(--format)--format[Output format: {json}]:string:' \
     '(-q --jq)'{-q,--jq}'[Filter JSON output using a jq expression]:expression:' \
@@ -1259,12 +1259,12 @@ _gh_release() {
         create) _gh_release_create ;;
         list) _gh_release_list ;;
         delete) _gh_release_delete ;;
-        delete-asset) _gh_release_delete_asset ;;
+        delete-asset) _gh_release_delete-asset ;;
         download) _gh_release_download ;;
         edit) _gh_release_edit ;;
         upload) _gh_release_upload ;;
         verify) _gh_release_verify ;;
-        verify-asset) _gh_release_verify_asset ;;
+        verify-asset) _gh_release_verify-asset ;;
         view) _gh_release_view ;;
       esac
       ;;
@@ -1328,7 +1328,7 @@ _gh_release_delete() {
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_gh_release_delete_asset() {
+_gh_release_delete-asset() {
   _arguments \
     '(-y --yes)'{-y,--yes}'[Skip the confirmation prompt]' \
     '(-R --repo)'{-R,--repo}'[Select another repository using the HOST/OWNER/REPO format]:[HOST/]OWNER/REPO:' \
@@ -1379,7 +1379,7 @@ _gh_release_verify() {
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_gh_release_verify_asset() {
+_gh_release_verify-asset() {
   _arguments \
     '(--format)--format[Output format: {json}]:string:' \
     '(-q --jq)'{-q,--jq}'[Filter JSON output using a jq expression]:expression:' \
@@ -1413,13 +1413,13 @@ _gh_repo() {
         autolink) _gh_repo_autolink ;;
         clone) _gh_repo_clone ;;
         delete) _gh_repo_delete ;;
-        deploy-key) _gh_repo_deploy_key ;;
+        deploy-key) _gh_repo_deploy-key ;;
         edit) _gh_repo_edit ;;
         fork) _gh_repo_fork ;;
         gitignore) _gh_repo_gitignore ;;
         license) _gh_repo_license ;;
         rename) _gh_repo_rename ;;
-        set-default) _gh_repo_set_default ;;
+        set-default) _gh_repo_set-default ;;
         sync) _gh_repo_sync ;;
         unarchive) _gh_repo_unarchive ;;
         view) _gh_repo_view ;;
@@ -1513,7 +1513,7 @@ _gh_repo_delete() {
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_gh_repo_deploy_key() {
+_gh_repo_deploy-key() {
   _arguments \
     '(-R --repo)'{-R,--repo}'[Select another repository using the HOST/OWNER/REPO format]:[HOST/]OWNER/REPO:' \
     '(-h --help)'{-h,--help}'[Display help for command]'
@@ -1574,7 +1574,7 @@ _gh_repo_rename() {
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_gh_repo_set_default() {
+_gh_repo_set-default() {
   _arguments \
     '(-u --unset)'{-u,--unset}'[Unset the current default repository]' \
     '(-v --view)'{-v,--view}'[View the current default repository]' \
@@ -1927,24 +1927,24 @@ _gh_co() {
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_gh_agent_task() {
+_gh_agent-task() {
   local curcontext="$curcontext" state line
   _arguments -C \
     '(-h --help)'{-h,--help}'[Display help for command]' \
-    '1: :_gh_agent_task_commands' \
+    '1: :_gh_agent-task_commands' \
     '*::arg:->args'
   case $state in
     args)
       case $line[1] in
-        create) _gh_agent_task_create ;;
-        list) _gh_agent_task_list ;;
-        view) _gh_agent_task_view ;;
+        create) _gh_agent-task_create ;;
+        list) _gh_agent-task_list ;;
+        view) _gh_agent-task_view ;;
       esac
       ;;
   esac
 }
 
-_gh_agent_task_commands() {
+_gh_agent-task_commands() {
   local -a _c=(
     'create:Create an agent task (preview)'
     'list:List agent tasks (preview)'
@@ -1954,7 +1954,7 @@ _gh_agent_task_commands() {
   _describe -t commands 'agent-task command' _c
 }
 
-_gh_agent_task_create() {
+_gh_agent-task_create() {
   _arguments \
     '(-b --base)'{-b,--base}'[Base branch for the pull request (use default branch if not provided)]:string:' \
     '(-a --custom-agent)'{-a,--custom-agent}'[Use a custom agent for the task. e.g., use my-agent for the my-agent.md agent]:string:' \
@@ -1964,7 +1964,7 @@ _gh_agent_task_create() {
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_gh_agent_task_list() {
+_gh_agent-task_list() {
   _arguments \
     '(-q --jq)'{-q,--jq}'[Filter JSON output using a jq expression]:expression:' \
     '*--json[Output JSON with the specified fields]:fields:' \
@@ -1974,7 +1974,7 @@ _gh_agent_task_list() {
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_gh_agent_task_view() {
+_gh_agent-task_view() {
   _arguments \
     '(--follow)--follow[Follow agent session logs]' \
     '(-q --jq)'{-q,--jq}'[Filter JSON output using a jq expression]:expression:' \
@@ -2069,7 +2069,7 @@ _gh_attestation() {
     args)
       case $line[1] in
         download) _gh_attestation_download ;;
-        trusted-root) _gh_attestation_trusted_root ;;
+        trusted-root) _gh_attestation_trusted-root ;;
         verify) _gh_attestation_verify ;;
       esac
       ;;
@@ -2097,7 +2097,7 @@ _gh_attestation_download() {
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_gh_attestation_trusted_root() {
+_gh_attestation_trusted-root() {
   _arguments \
     '(--hostname)--hostname[Configure host to use]:string:' \
     '(--tuf-root)--tuf-root[Path to the TUF root.json file on disk]:string:' \
@@ -2142,7 +2142,7 @@ _gh_config() {
   case $state in
     args)
       case $line[1] in
-        clear-cache) _gh_config_clear_cache ;;
+        clear-cache) _gh_config_clear-cache ;;
         get) _gh_config_get ;;
         list) _gh_config_list ;;
         set) _gh_config_set ;;
@@ -2162,7 +2162,7 @@ _gh_config_commands() {
   _describe -t commands 'config command' _c
 }
 
-_gh_config_clear_cache() {
+_gh_config_clear-cache() {
   _arguments \
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
@@ -2282,24 +2282,24 @@ _gh_extension_upgrade() {
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_gh_gpg_key() {
+_gh_gpg-key() {
   local curcontext="$curcontext" state line
   _arguments -C \
     '(-h --help)'{-h,--help}'[Display help for command]' \
-    '1: :_gh_gpg_key_commands' \
+    '1: :_gh_gpg-key_commands' \
     '*::arg:->args'
   case $state in
     args)
       case $line[1] in
-        add) _gh_gpg_key_add ;;
-        delete) _gh_gpg_key_delete ;;
-        list) _gh_gpg_key_list ;;
+        add) _gh_gpg-key_add ;;
+        delete) _gh_gpg-key_delete ;;
+        list) _gh_gpg-key_list ;;
       esac
       ;;
   esac
 }
 
-_gh_gpg_key_commands() {
+_gh_gpg-key_commands() {
   local -a _c=(
     'add:Add a GPG key to your GitHub account'
     'delete:Delete a GPG key from your GitHub account'
@@ -2309,19 +2309,19 @@ _gh_gpg_key_commands() {
   _describe -t commands 'gpg-key command' _c
 }
 
-_gh_gpg_key_add() {
+_gh_gpg-key_add() {
   _arguments \
     '(-t --title)'{-t,--title}'[Title for the new key]:string:' \
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_gh_gpg_key_delete() {
+_gh_gpg-key_delete() {
   _arguments \
     '(-y --yes)'{-y,--yes}'[Skip the confirmation prompt]' \
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_gh_gpg_key_list() {
+_gh_gpg-key_list() {
   _arguments \
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
@@ -2753,24 +2753,24 @@ _gh_secret_set() {
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_gh_ssh_key() {
+_gh_ssh-key() {
   local curcontext="$curcontext" state line
   _arguments -C \
     '(-h --help)'{-h,--help}'[Display help for command]' \
-    '1: :_gh_ssh_key_commands' \
+    '1: :_gh_ssh-key_commands' \
     '*::arg:->args'
   case $state in
     args)
       case $line[1] in
-        add) _gh_ssh_key_add ;;
-        delete) _gh_ssh_key_delete ;;
-        list) _gh_ssh_key_list ;;
+        add) _gh_ssh-key_add ;;
+        delete) _gh_ssh-key_delete ;;
+        list) _gh_ssh-key_list ;;
       esac
       ;;
   esac
 }
 
-_gh_ssh_key_commands() {
+_gh_ssh-key_commands() {
   local -a _c=(
     'add:Add an SSH key to your GitHub account'
     'delete:Delete an SSH key from your GitHub account'
@@ -2780,20 +2780,20 @@ _gh_ssh_key_commands() {
   _describe -t commands 'ssh-key command' _c
 }
 
-_gh_ssh_key_add() {
+_gh_ssh-key_add() {
   _arguments \
     '(-t --title)'{-t,--title}'[Title for the new key]:string:' \
     '(--type)--type[Type of the ssh key: {authentication|signing}]:string:' \
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_gh_ssh_key_delete() {
+_gh_ssh-key_delete() {
   _arguments \
     '(-y --yes)'{-y,--yes}'[Skip the confirmation prompt]' \
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_gh_ssh_key_list() {
+_gh_ssh-key_list() {
   _arguments \
     '(-h --help)'{-h,--help}'[Display help for command]'
 }

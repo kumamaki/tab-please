@@ -24,16 +24,16 @@ _wrangler() {
         login) _wrangler_login ;;
         logout) _wrangler_logout ;;
         whoami) _wrangler_whoami ;;
-        agent-memory) _wrangler_agent_memory ;;
+        agent-memory) _wrangler_agent-memory ;;
         ai) _wrangler_ai ;;
-        ai-search) _wrangler_ai_search ;;
+        ai-search) _wrangler_ai-search ;;
         browser) _wrangler_browser ;;
         containers) _wrangler_containers ;;
         delete) _wrangler_delete ;;
         deploy) _wrangler_deploy ;;
         deployments) _wrangler_deployments ;;
         dev) _wrangler_dev ;;
-        dispatch-namespace) _wrangler_dispatch_namespace ;;
+        dispatch-namespace) _wrangler_dispatch-namespace ;;
         init) _wrangler_init ;;
         pages) _wrangler_pages ;;
         preview) _wrangler_preview ;;
@@ -54,10 +54,10 @@ _wrangler() {
         kv) _wrangler_kv ;;
         pipelines) _wrangler_pipelines ;;
         r2) _wrangler_r2 ;;
-        secrets-store) _wrangler_secrets_store ;;
+        secrets-store) _wrangler_secrets-store ;;
         vectorize) _wrangler_vectorize ;;
         cert) _wrangler_cert ;;
-        mtls-certificate) _wrangler_mtls_certificate ;;
+        mtls-certificate) _wrangler_mtls-certificate ;;
         tunnel) _wrangler_tunnel ;;
       esac
       ;;
@@ -262,7 +262,7 @@ _wrangler_whoami() {
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_wrangler_agent_memory() {
+_wrangler_agent-memory() {
   local curcontext="$curcontext" state line
   _arguments -C \
     '(-c --config)'{-c,--config}'[Path to Wrangler configuration file]::string:' \
@@ -271,18 +271,18 @@ _wrangler_agent_memory() {
     '*--env-file[Path to an .env file to load - can be specified multiple times - values from earlier files are overridden by values in later files]::value:' \
     '(--install-skills)--install-skills[Install Cloudflare agents skills, if not already present, without asking the user for confirmation]' \
     '(-h --help)'{-h,--help}'[Display help for command]' \
-    '1: :_wrangler_agent_memory_commands' \
+    '1: :_wrangler_agent-memory_commands' \
     '*::arg:->args'
   case $state in
     args)
       case $line[1] in
-        namespace) _wrangler_agent_memory_namespace ;;
+        namespace) _wrangler_agent-memory_namespace ;;
       esac
       ;;
   esac
 }
 
-_wrangler_agent_memory_commands() {
+_wrangler_agent-memory_commands() {
   local -a _c=(
     'namespace:Manage Agent Memory namespaces private beta'
     'help:Display help for command'
@@ -290,7 +290,7 @@ _wrangler_agent_memory_commands() {
   _describe -t commands 'agent-memory command' _c
 }
 
-_wrangler_agent_memory_namespace() {
+_wrangler_agent-memory_namespace() {
   _arguments \
     '(-c --config)'{-c,--config}'[Path to Wrangler configuration file]::string:' \
     '(--cwd)--cwd[Run as if Wrangler was started in the specified directory instead of the current working directory]::string:' \
@@ -350,7 +350,7 @@ _wrangler_ai_finetune() {
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_wrangler_ai_search() {
+_wrangler_ai-search() {
   local curcontext="$curcontext" state line
   _arguments -C \
     '(-c --config)'{-c,--config}'[Path to Wrangler configuration file]::string:' \
@@ -359,25 +359,25 @@ _wrangler_ai_search() {
     '*--env-file[Path to an .env file to load - can be specified multiple times - values from earlier files are overridden by values in later files]::value:' \
     '(--install-skills)--install-skills[Install Cloudflare agents skills, if not already present, without asking the user for confirmation]' \
     '(-h --help)'{-h,--help}'[Display help for command]' \
-    '1: :_wrangler_ai_search_commands' \
+    '1: :_wrangler_ai-search_commands' \
     '*::arg:->args'
   case $state in
     args)
       case $line[1] in
-        list) _wrangler_ai_search_list ;;
-        create) _wrangler_ai_search_create ;;
-        get) _wrangler_ai_search_get ;;
-        update) _wrangler_ai_search_update ;;
-        delete) _wrangler_ai_search_delete ;;
-        stats) _wrangler_ai_search_stats ;;
-        search) _wrangler_ai_search_search ;;
-        namespace) _wrangler_ai_search_namespace ;;
+        list) _wrangler_ai-search_list ;;
+        create) _wrangler_ai-search_create ;;
+        get) _wrangler_ai-search_get ;;
+        update) _wrangler_ai-search_update ;;
+        delete) _wrangler_ai-search_delete ;;
+        stats) _wrangler_ai-search_stats ;;
+        search) _wrangler_ai-search_search ;;
+        namespace) _wrangler_ai-search_namespace ;;
       esac
       ;;
   esac
 }
 
-_wrangler_ai_search_commands() {
+_wrangler_ai-search_commands() {
   local -a _c=(
     'list:List all AI Search instances open beta'
     'create:Create a new AI Search instance open beta'
@@ -392,7 +392,7 @@ _wrangler_ai_search_commands() {
   _describe -t commands 'ai-search command' _c
 }
 
-_wrangler_ai_search_list() {
+_wrangler_ai-search_list() {
   _arguments \
     '(-c --config)'{-c,--config}'[Path to Wrangler configuration file]::string:' \
     '(--cwd)--cwd[Run as if Wrangler was started in the specified directory instead of the current working directory]::string:' \
@@ -406,7 +406,7 @@ _wrangler_ai_search_list() {
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_wrangler_ai_search_create() {
+_wrangler_ai-search_create() {
   _arguments \
     '(-c --config)'{-c,--config}'[Path to Wrangler configuration file]::string:' \
     '(--cwd)--cwd[Run as if Wrangler was started in the specified directory instead of the current working directory]::string:' \
@@ -436,7 +436,7 @@ _wrangler_ai_search_create() {
     '1:name:'
 }
 
-_wrangler_ai_search_get() {
+_wrangler_ai-search_get() {
   _arguments \
     '(-c --config)'{-c,--config}'[Path to Wrangler configuration file]::string:' \
     '(--cwd)--cwd[Run as if Wrangler was started in the specified directory instead of the current working directory]::string:' \
@@ -449,7 +449,7 @@ _wrangler_ai_search_get() {
     '1:name:'
 }
 
-_wrangler_ai_search_update() {
+_wrangler_ai-search_update() {
   _arguments \
     '(-c --config)'{-c,--config}'[Path to Wrangler configuration file]::string:' \
     '(--cwd)--cwd[Run as if Wrangler was started in the specified directory instead of the current working directory]::string:' \
@@ -473,7 +473,7 @@ _wrangler_ai_search_update() {
     '1:name:'
 }
 
-_wrangler_ai_search_delete() {
+_wrangler_ai-search_delete() {
   _arguments \
     '(-c --config)'{-c,--config}'[Path to Wrangler configuration file]::string:' \
     '(--cwd)--cwd[Run as if Wrangler was started in the specified directory instead of the current working directory]::string:' \
@@ -486,7 +486,7 @@ _wrangler_ai_search_delete() {
     '1:name:'
 }
 
-_wrangler_ai_search_stats() {
+_wrangler_ai-search_stats() {
   _arguments \
     '(-c --config)'{-c,--config}'[Path to Wrangler configuration file]::string:' \
     '(--cwd)--cwd[Run as if Wrangler was started in the specified directory instead of the current working directory]::string:' \
@@ -499,7 +499,7 @@ _wrangler_ai_search_stats() {
     '1:name:'
 }
 
-_wrangler_ai_search_search() {
+_wrangler_ai-search_search() {
   _arguments \
     '(-c --config)'{-c,--config}'[Path to Wrangler configuration file]::string:' \
     '(--cwd)--cwd[Run as if Wrangler was started in the specified directory instead of the current working directory]::string:' \
@@ -517,7 +517,7 @@ _wrangler_ai_search_search() {
     '1:name:'
 }
 
-_wrangler_ai_search_namespace() {
+_wrangler_ai-search_namespace() {
   _arguments \
     '(-c --config)'{-c,--config}'[Path to Wrangler configuration file]::string:' \
     '(--cwd)--cwd[Run as if Wrangler was started in the specified directory instead of the current working directory]::string:' \
@@ -915,7 +915,7 @@ _wrangler_dev() {
     '1:script:'
 }
 
-_wrangler_dispatch_namespace() {
+_wrangler_dispatch-namespace() {
   local curcontext="$curcontext" state line
   _arguments -C \
     '(-c --config)'{-c,--config}'[Path to Wrangler configuration file]::string:' \
@@ -924,22 +924,22 @@ _wrangler_dispatch_namespace() {
     '*--env-file[Path to an .env file to load - can be specified multiple times - values from earlier files are overridden by values in later files]::value:' \
     '(--install-skills)--install-skills[Install Cloudflare agents skills, if not already present, without asking the user for confirmation]' \
     '(-h --help)'{-h,--help}'[Display help for command]' \
-    '1: :_wrangler_dispatch_namespace_commands' \
+    '1: :_wrangler_dispatch-namespace_commands' \
     '*::arg:->args'
   case $state in
     args)
       case $line[1] in
-        list) _wrangler_dispatch_namespace_list ;;
-        get) _wrangler_dispatch_namespace_get ;;
-        create) _wrangler_dispatch_namespace_create ;;
-        delete) _wrangler_dispatch_namespace_delete ;;
-        rename) _wrangler_dispatch_namespace_rename ;;
+        list) _wrangler_dispatch-namespace_list ;;
+        get) _wrangler_dispatch-namespace_get ;;
+        create) _wrangler_dispatch-namespace_create ;;
+        delete) _wrangler_dispatch-namespace_delete ;;
+        rename) _wrangler_dispatch-namespace_rename ;;
       esac
       ;;
   esac
 }
 
-_wrangler_dispatch_namespace_commands() {
+_wrangler_dispatch-namespace_commands() {
   local -a _c=(
     'list:List all dispatch namespaces'
     'get:Get information about a dispatch namespace'
@@ -951,7 +951,7 @@ _wrangler_dispatch_namespace_commands() {
   _describe -t commands 'dispatch-namespace command' _c
 }
 
-_wrangler_dispatch_namespace_list() {
+_wrangler_dispatch-namespace_list() {
   _arguments \
     '(-c --config)'{-c,--config}'[Path to Wrangler configuration file]::string:' \
     '(--cwd)--cwd[Run as if Wrangler was started in the specified directory instead of the current working directory]::string:' \
@@ -961,7 +961,7 @@ _wrangler_dispatch_namespace_list() {
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_wrangler_dispatch_namespace_get() {
+_wrangler_dispatch-namespace_get() {
   _arguments \
     '(-c --config)'{-c,--config}'[Path to Wrangler configuration file]::string:' \
     '(--cwd)--cwd[Run as if Wrangler was started in the specified directory instead of the current working directory]::string:' \
@@ -972,7 +972,7 @@ _wrangler_dispatch_namespace_get() {
     '1:name:'
 }
 
-_wrangler_dispatch_namespace_create() {
+_wrangler_dispatch-namespace_create() {
   _arguments \
     '(-c --config)'{-c,--config}'[Path to Wrangler configuration file]::string:' \
     '(--cwd)--cwd[Run as if Wrangler was started in the specified directory instead of the current working directory]::string:' \
@@ -983,7 +983,7 @@ _wrangler_dispatch_namespace_create() {
     '1:name:'
 }
 
-_wrangler_dispatch_namespace_delete() {
+_wrangler_dispatch-namespace_delete() {
   _arguments \
     '(-c --config)'{-c,--config}'[Path to Wrangler configuration file]::string:' \
     '(--cwd)--cwd[Run as if Wrangler was started in the specified directory instead of the current working directory]::string:' \
@@ -994,7 +994,7 @@ _wrangler_dispatch_namespace_delete() {
     '1:name:'
 }
 
-_wrangler_dispatch_namespace_rename() {
+_wrangler_dispatch-namespace_rename() {
   _arguments \
     '(-c --config)'{-c,--config}'[Path to Wrangler configuration file]::string:' \
     '(--cwd)--cwd[Run as if Wrangler was started in the specified directory instead of the current working directory]::string:' \
@@ -1256,8 +1256,8 @@ _wrangler_queues() {
         delete) _wrangler_queues_delete ;;
         info) _wrangler_queues_info ;;
         consumer) _wrangler_queues_consumer ;;
-        pause-delivery) _wrangler_queues_pause_delivery ;;
-        resume-delivery) _wrangler_queues_resume_delivery ;;
+        pause-delivery) _wrangler_queues_pause-delivery ;;
+        resume-delivery) _wrangler_queues_resume-delivery ;;
         purge) _wrangler_queues_purge ;;
         subscription) _wrangler_queues_subscription ;;
       esac
@@ -1351,7 +1351,7 @@ _wrangler_queues_consumer() {
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_wrangler_queues_pause_delivery() {
+_wrangler_queues_pause-delivery() {
   _arguments \
     '(-c --config)'{-c,--config}'[Path to Wrangler configuration file]::string:' \
     '(--cwd)--cwd[Run as if Wrangler was started in the specified directory instead of the current working directory]::string:' \
@@ -1362,7 +1362,7 @@ _wrangler_queues_pause_delivery() {
     '1:name:'
 }
 
-_wrangler_queues_resume_delivery() {
+_wrangler_queues_resume-delivery() {
   _arguments \
     '(-c --config)'{-c,--config}'[Path to Wrangler configuration file]::string:' \
     '(--cwd)--cwd[Run as if Wrangler was started in the specified directory instead of the current working directory]::string:' \
@@ -1952,7 +1952,7 @@ _wrangler_d1() {
         delete) _wrangler_d1_delete ;;
         execute) _wrangler_d1_execute ;;
         export) _wrangler_d1_export ;;
-        time-travel) _wrangler_d1_time_travel ;;
+        time-travel) _wrangler_d1_time-travel ;;
         migrations) _wrangler_d1_migrations ;;
         insights) _wrangler_d1_insights ;;
       esac
@@ -2064,7 +2064,7 @@ _wrangler_d1_export() {
     '1:name:'
 }
 
-_wrangler_d1_time_travel() {
+_wrangler_d1_time-travel() {
   _arguments \
     '(-c --config)'{-c,--config}'[Path to Wrangler configuration file]::string:' \
     '(--cwd)--cwd[Run as if Wrangler was started in the specified directory instead of the current working directory]::string:' \
@@ -2462,7 +2462,7 @@ _wrangler_r2_sql() {
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_wrangler_secrets_store() {
+_wrangler_secrets-store() {
   local curcontext="$curcontext" state line
   _arguments -C \
     '(-c --config)'{-c,--config}'[Path to Wrangler configuration file]::string:' \
@@ -2471,19 +2471,19 @@ _wrangler_secrets_store() {
     '*--env-file[Path to an .env file to load - can be specified multiple times - values from earlier files are overridden by values in later files]::value:' \
     '(--install-skills)--install-skills[Install Cloudflare agents skills, if not already present, without asking the user for confirmation]' \
     '(-h --help)'{-h,--help}'[Display help for command]' \
-    '1: :_wrangler_secrets_store_commands' \
+    '1: :_wrangler_secrets-store_commands' \
     '*::arg:->args'
   case $state in
     args)
       case $line[1] in
-        store) _wrangler_secrets_store_store ;;
-        secret) _wrangler_secrets_store_secret ;;
+        store) _wrangler_secrets-store_store ;;
+        secret) _wrangler_secrets-store_secret ;;
       esac
       ;;
   esac
 }
 
-_wrangler_secrets_store_commands() {
+_wrangler_secrets-store_commands() {
   local -a _c=(
     'store:🔐 Manage Stores within the Secrets Store open beta'
     'secret:🔐 Manage Secrets within the Secrets Store open beta'
@@ -2492,7 +2492,7 @@ _wrangler_secrets_store_commands() {
   _describe -t commands 'secrets-store command' _c
 }
 
-_wrangler_secrets_store_store() {
+_wrangler_secrets-store_store() {
   _arguments \
     '(-c --config)'{-c,--config}'[Path to Wrangler configuration file]::string:' \
     '(--cwd)--cwd[Run as if Wrangler was started in the specified directory instead of the current working directory]::string:' \
@@ -2502,7 +2502,7 @@ _wrangler_secrets_store_store() {
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_wrangler_secrets_store_secret() {
+_wrangler_secrets-store_secret() {
   _arguments \
     '(-c --config)'{-c,--config}'[Path to Wrangler configuration file]::string:' \
     '(--cwd)--cwd[Run as if Wrangler was started in the specified directory instead of the current working directory]::string:' \
@@ -2530,16 +2530,16 @@ _wrangler_vectorize() {
         delete) _wrangler_vectorize_delete ;;
         get) _wrangler_vectorize_get ;;
         list) _wrangler_vectorize_list ;;
-        list-vectors) _wrangler_vectorize_list_vectors ;;
+        list-vectors) _wrangler_vectorize_list-vectors ;;
         query) _wrangler_vectorize_query ;;
         insert) _wrangler_vectorize_insert ;;
         upsert) _wrangler_vectorize_upsert ;;
-        get-vectors) _wrangler_vectorize_get_vectors ;;
-        delete-vectors) _wrangler_vectorize_delete_vectors ;;
+        get-vectors) _wrangler_vectorize_get-vectors ;;
+        delete-vectors) _wrangler_vectorize_delete-vectors ;;
         info) _wrangler_vectorize_info ;;
-        create-metadata-index) _wrangler_vectorize_create_metadata_index ;;
-        list-metadata-index) _wrangler_vectorize_list_metadata_index ;;
-        delete-metadata-index) _wrangler_vectorize_delete_metadata_index ;;
+        create-metadata-index) _wrangler_vectorize_create-metadata-index ;;
+        list-metadata-index) _wrangler_vectorize_list-metadata-index ;;
+        delete-metadata-index) _wrangler_vectorize_delete-metadata-index ;;
       esac
       ;;
   esac
@@ -2624,7 +2624,7 @@ _wrangler_vectorize_list() {
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_wrangler_vectorize_list_vectors() {
+_wrangler_vectorize_list-vectors() {
   _arguments \
     '(-c --config)'{-c,--config}'[Path to Wrangler configuration file]::string:' \
     '(--cwd)--cwd[Run as if Wrangler was started in the specified directory instead of the current working directory]::string:' \
@@ -2685,7 +2685,7 @@ _wrangler_vectorize_upsert() {
     '1:name:'
 }
 
-_wrangler_vectorize_get_vectors() {
+_wrangler_vectorize_get-vectors() {
   _arguments \
     '(-c --config)'{-c,--config}'[Path to Wrangler configuration file]::string:' \
     '(--cwd)--cwd[Run as if Wrangler was started in the specified directory instead of the current working directory]::string:' \
@@ -2697,7 +2697,7 @@ _wrangler_vectorize_get_vectors() {
     '1:name:'
 }
 
-_wrangler_vectorize_delete_vectors() {
+_wrangler_vectorize_delete-vectors() {
   _arguments \
     '(-c --config)'{-c,--config}'[Path to Wrangler configuration file]::string:' \
     '(--cwd)--cwd[Run as if Wrangler was started in the specified directory instead of the current working directory]::string:' \
@@ -2721,7 +2721,7 @@ _wrangler_vectorize_info() {
     '1:name:'
 }
 
-_wrangler_vectorize_create_metadata_index() {
+_wrangler_vectorize_create-metadata-index() {
   _arguments \
     '(-c --config)'{-c,--config}'[Path to Wrangler configuration file]::string:' \
     '(--cwd)--cwd[Run as if Wrangler was started in the specified directory instead of the current working directory]::string:' \
@@ -2734,7 +2734,7 @@ _wrangler_vectorize_create_metadata_index() {
     '1:name:'
 }
 
-_wrangler_vectorize_list_metadata_index() {
+_wrangler_vectorize_list-metadata-index() {
   _arguments \
     '(-c --config)'{-c,--config}'[Path to Wrangler configuration file]::string:' \
     '(--cwd)--cwd[Run as if Wrangler was started in the specified directory instead of the current working directory]::string:' \
@@ -2746,7 +2746,7 @@ _wrangler_vectorize_list_metadata_index() {
     '1:name:'
 }
 
-_wrangler_vectorize_delete_metadata_index() {
+_wrangler_vectorize_delete-metadata-index() {
   _arguments \
     '(-c --config)'{-c,--config}'[Path to Wrangler configuration file]::string:' \
     '(--cwd)--cwd[Run as if Wrangler was started in the specified directory instead of the current working directory]::string:' \
@@ -2822,7 +2822,7 @@ _wrangler_cert_delete() {
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_wrangler_mtls_certificate() {
+_wrangler_mtls-certificate() {
   local curcontext="$curcontext" state line
   _arguments -C \
     '(-c --config)'{-c,--config}'[Path to Wrangler configuration file]::string:' \
@@ -2831,20 +2831,20 @@ _wrangler_mtls_certificate() {
     '*--env-file[Path to an .env file to load - can be specified multiple times - values from earlier files are overridden by values in later files]::value:' \
     '(--install-skills)--install-skills[Install Cloudflare agents skills, if not already present, without asking the user for confirmation]' \
     '(-h --help)'{-h,--help}'[Display help for command]' \
-    '1: :_wrangler_mtls_certificate_commands' \
+    '1: :_wrangler_mtls-certificate_commands' \
     '*::arg:->args'
   case $state in
     args)
       case $line[1] in
-        upload) _wrangler_mtls_certificate_upload ;;
-        list) _wrangler_mtls_certificate_list ;;
-        delete) _wrangler_mtls_certificate_delete ;;
+        upload) _wrangler_mtls-certificate_upload ;;
+        list) _wrangler_mtls-certificate_list ;;
+        delete) _wrangler_mtls-certificate_delete ;;
       esac
       ;;
   esac
 }
 
-_wrangler_mtls_certificate_commands() {
+_wrangler_mtls-certificate_commands() {
   local -a _c=(
     'upload:Upload an mTLS certificate'
     'list:List uploaded mTLS certificates'
@@ -2854,7 +2854,7 @@ _wrangler_mtls_certificate_commands() {
   _describe -t commands 'mtls-certificate command' _c
 }
 
-_wrangler_mtls_certificate_upload() {
+_wrangler_mtls-certificate_upload() {
   _arguments \
     '(-c --config)'{-c,--config}'[Path to Wrangler configuration file]::string:' \
     '(--cwd)--cwd[Run as if Wrangler was started in the specified directory instead of the current working directory]::string:' \
@@ -2867,7 +2867,7 @@ _wrangler_mtls_certificate_upload() {
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_wrangler_mtls_certificate_list() {
+_wrangler_mtls-certificate_list() {
   _arguments \
     '(-c --config)'{-c,--config}'[Path to Wrangler configuration file]::string:' \
     '(--cwd)--cwd[Run as if Wrangler was started in the specified directory instead of the current working directory]::string:' \
@@ -2877,7 +2877,7 @@ _wrangler_mtls_certificate_list() {
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_wrangler_mtls_certificate_delete() {
+_wrangler_mtls-certificate_delete() {
   _arguments \
     '(-c --config)'{-c,--config}'[Path to Wrangler configuration file]::string:' \
     '(--cwd)--cwd[Run as if Wrangler was started in the specified directory instead of the current working directory]::string:' \
@@ -2908,7 +2908,7 @@ _wrangler_tunnel() {
         info) _wrangler_tunnel_info ;;
         list) _wrangler_tunnel_list ;;
         run) _wrangler_tunnel_run ;;
-        quick-start) _wrangler_tunnel_quick_start ;;
+        quick-start) _wrangler_tunnel_quick-start ;;
       esac
       ;;
   esac
@@ -2984,7 +2984,7 @@ _wrangler_tunnel_run() {
     '1:tunnel:'
 }
 
-_wrangler_tunnel_quick_start() {
+_wrangler_tunnel_quick-start() {
   _arguments \
     '(-c --config)'{-c,--config}'[Path to Wrangler configuration file]::string:' \
     '(--cwd)--cwd[Run as if Wrangler was started in the specified directory instead of the current working directory]::string:' \

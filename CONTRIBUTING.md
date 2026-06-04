@@ -13,8 +13,11 @@ Say the binary is `foo`.
 
    The format is auto-detected (commander/yargs/cobra/clap/click/argparse).
    Eyeball `generated.json` — check the `format` field and that the tree/flags
-   look right. If detection picked wrong, force it with `--format <name>`. If
-   `foo` uses a format we don't parse yet, see "New help formats" below.
+   look right. If detection picked wrong (or `foo` needs the opt-in `generic`
+   getopt fallback), force it with `--format <name>` **and pin it in enrich.ts**
+   (`format: "<name>"`, step 3) — otherwise the next regen re-auto-detects and
+   clobbers your output. If `foo` uses a format we don't parse yet, see "New
+   help formats" below.
 
 2. **Build it** (no enrichment yet — boolean flags, plain positionals):
 
@@ -29,6 +32,7 @@ Say the binary is `foo`.
    import type { Enrich } from "../../generator/types.ts";
 
    const enrich: Enrich = {
+     // format: "generic",        // optional — pin a forced --format so regen honors it
      helpersFile: "helpers.zsh", // optional, for dynamic completions
      actions: {
        // "<command path>::<selector>": "<zsh action>"

@@ -112,13 +112,13 @@ _claude() {
       case $line[1] in
         agents) _claude_agents ;;
         auth) _claude_auth ;;
-        auto-mode) _claude_auto_mode ;;
+        auto-mode) _claude_auto-mode ;;
         doctor) _claude_doctor ;;
         install) _claude_install ;;
         mcp) _claude_mcp ;;
         plugin|plugins) _claude_plugin ;;
         project) _claude_project ;;
-        setup-token) _claude_setup_token ;;
+        setup-token) _claude_setup-token ;;
         ultrareview) _claude_ultrareview ;;
         update|upgrade) _claude_update ;;
       esac
@@ -211,24 +211,24 @@ _claude_auth_status() {
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_claude_auto_mode() {
+_claude_auto-mode() {
   local curcontext="$curcontext" state line
   _arguments -C \
     '(-h --help)'{-h,--help}'[Display help for command]' \
-    '1: :_claude_auto_mode_commands' \
+    '1: :_claude_auto-mode_commands' \
     '*::arg:->args'
   case $state in
     args)
       case $line[1] in
-        config) _claude_auto_mode_config ;;
-        critique) _claude_auto_mode_critique ;;
-        defaults) _claude_auto_mode_defaults ;;
+        config) _claude_auto-mode_config ;;
+        critique) _claude_auto-mode_critique ;;
+        defaults) _claude_auto-mode_defaults ;;
       esac
       ;;
   esac
 }
 
-_claude_auto_mode_commands() {
+_claude_auto-mode_commands() {
   local -a _c=(
     'config:Print the effective auto mode config as JSON: your settings where set, defaults otherwise'
     'critique:Get AI feedback on your custom auto mode rules'
@@ -238,18 +238,18 @@ _claude_auto_mode_commands() {
   _describe -t commands 'auto-mode command' _c
 }
 
-_claude_auto_mode_config() {
+_claude_auto-mode_config() {
   _arguments \
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_claude_auto_mode_critique() {
+_claude_auto-mode_critique() {
   _arguments \
     '(--model)--model[Override which model is used]:model:' \
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_claude_auto_mode_defaults() {
+_claude_auto-mode_defaults() {
   _arguments \
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
@@ -276,12 +276,12 @@ _claude_mcp() {
     args)
       case $line[1] in
         add) _claude_mcp_add ;;
-        add-from-claude-desktop) _claude_mcp_add_from_claude_desktop ;;
-        add-json) _claude_mcp_add_json ;;
+        add-from-claude-desktop) _claude_mcp_add-from-claude-desktop ;;
+        add-json) _claude_mcp_add-json ;;
         get) _claude_mcp_get ;;
         list) _claude_mcp_list ;;
         remove) _claude_mcp_remove ;;
-        reset-project-choices) _claude_mcp_reset_project_choices ;;
+        reset-project-choices) _claude_mcp_reset-project-choices ;;
         serve) _claude_mcp_serve ;;
       esac
       ;;
@@ -318,13 +318,13 @@ _claude_mcp_add() {
     '3:args:'
 }
 
-_claude_mcp_add_from_claude_desktop() {
+_claude_mcp_add-from-claude-desktop() {
   _arguments \
     '(-s --scope)'{-s,--scope}'[Configuration scope (local, user, or project)]:scope:' \
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
 
-_claude_mcp_add_json() {
+_claude_mcp_add-json() {
   _arguments \
     '(--client-secret)--client-secret[Prompt for OAuth client secret (or set MCP_CLIENT_SECRET env var)]' \
     '(-s --scope)'{-s,--scope}'[Configuration scope (local, user, or project)]:scope:' \
@@ -351,7 +351,7 @@ _claude_mcp_remove() {
     '1:name:_claude_mcp_servers'
 }
 
-_claude_mcp_reset_project_choices() {
+_claude_mcp_reset-project-choices() {
   _arguments \
     '(-h --help)'{-h,--help}'[Display help for command]'
 }
@@ -587,7 +587,7 @@ _claude_project_purge() {
     '1:path:'
 }
 
-_claude_setup_token() {
+_claude_setup-token() {
   _arguments \
     '(-h --help)'{-h,--help}'[Display help for command]'
 }

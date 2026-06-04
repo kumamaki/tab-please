@@ -1,22 +1,29 @@
 # tab-please
 
-Zsh completions for popular CLIs that **stay current**. Each completion is
-generated from the tool's own `--help` and hand-enriched where it counts
-(choice values, dynamic lookups, file/dir typing) — then regenerated
-automatically when the CLI ships a new version. No more stale, hand-written
-completion files that rot the moment a subcommand is added.
+Fresh zsh completions for CLIs — a curated set **and** on demand for anything.
+
+- **Curated** — completions for `claude`, `gemini`, `wrangler`, `gh`: generated
+  from each tool's `--help`, hand-enriched where it counts (live values, choice
+  sets, file typing), and **regenerated automatically** when the CLI ships a new
+  version. No more hand-written completions that rot the moment a subcommand lands.
+- **On demand** — `tab-please add <anytool>` builds a completion for *any*
+  installed CLI from its `--help`, right now. Lower fidelity (no enrichment), but
+  instant and works on anything.
+
+Same engine underneath; the curated set just adds a human-polish layer on top.
 
 ```
-claude mcp remove <Tab>      → your actual configured MCP servers
+claude mcp remove <Tab>        → your actual configured MCP servers
 claude --permission-mode <Tab> → acceptEdits  auto  bypassPermissions  default  …
-claude plugin enable <Tab>   → your actually-installed plugins
+gemini extensions <Tab>        → install  uninstall  list  update  link  …
+tab-please add sea-orm-cli     → instant completion for a tool we don't ship
 ```
 
-## Why another completions repo?
+## Why it stays fresh
 
 Hand-written completions are a snapshot — they drift on every CLI release.
-tab-please splits each completion into two layers and **regenerates the boring
-one for you**:
+tab-please splits each **curated** completion into two layers and **regenerates
+the boring one for you**:
 
 ```
 ┌─ parsed from `cmd --help` (CI-refreshed) ─┐   ┌─ written by a human (durable) ─┐
@@ -25,10 +32,10 @@ one for you**:
 └───────────────────────────────────────────┘   └─────────────────────────────────┘
 ```
 
-A new subcommand in `cmd` shows up automatically (with its flags) the next time
-CI regenerates. Your enrichment is keyed by command path, so it survives the
-refresh — it's never clobbered. The only manual step is *optionally* binding a
-value action where it adds value.
+A new subcommand shows up automatically (with its flags) the next time CI
+regenerates; your enrichment is keyed by command path, so it survives the refresh
+— it's never clobbered. (On-demand completions skip the human layer entirely:
+`--help` structure only, no enrichment.)
 
 ## Install
 
@@ -62,6 +69,85 @@ fpath=(/path/to/tab-please/dist $fpath)
 
 After installing, `exec zsh`.
 
+## Usage
+
+### Shipped completions
+
+Once installed, the curated tools just complete — nothing else to do:
+
+```zsh
+claude <Tab>                 # mcp  plugin  install  update  …
+claude mcp remove <Tab>      # your live, configured MCP servers
+claude --permission-mode <Tab>   # acceptEdits  auto  bypassPermissions  default
+gemini extensions <Tab>      # install  uninstall  list  update  link  …
+wrangler kv <Tab>            # namespace  key  bulk  …
+```
+
+### `tab-please add <tool>` — any CLI, on demand
+
+Generate a completion for any installed command straight from its `--help`
+(needs [`bun`](https://bun.sh)):
+
+```zsh
+tab-please add sea-orm-cli                   # parse → load into THIS shell now
+tab-please add httpie                        # works on anything with a --help
+tab-please add some-getopt-tool --format generic   # force a parser if auto-detect misses
+```
+
+It's active immediately and persists across shells (the plugin keeps the output
+dir on `fpath`). Files land in `$TAB_PLEASE_USER_DIR`
+(default `~/.local/share/tab-please/completions`).
+
+**Fidelity — what on-demand gives you vs. a curated tool:**
+
+```
+                       curated (enriched)        on-demand (raw --help)
+subcommand tree        ✓                         ✓
+flags + descriptions   ✓                         ✓
+choices help prints    ✓                         ✓   (--permission-mode, etc.)
+live/dynamic values    ✓  mcp remove → servers   ✗   help can't know your state
+value sets help omits  ✓  --model → opus/…       ✗   completes nothing
+```
+
+For "I just installed X, complete it" on-demand is exactly right. For a tool you
+use daily, add it to the curated set with a PR so it gets the enrichment layer.
+
+### `tab-please scan` — find what's missing
+
+Audit your installed tools and see which have no completion — and what to do
+about each:
+
+```zsh
+tab-please scan          # report only
+tab-please scan --add    # also generate the "worth adding" ones
+```
+```
+✗ no completion — worth adding:
+    gemini             yargs: 5 subcommands, 27 flags
+    sea-orm-cli        commander: 2 subcommands, 2 flags
+    → tab-please add gemini sea-orm-cli …
+◆ no completion — but the tool ships its own (enable it, don't generate):
+    rustup             rustup completions zsh
+· no completion — low value (flat / one-shot), skipped:
+    btop  duf  exiftool  …
+```
+
+It buckets each gap into **worth adding** (run `tab-please add`), **ships its
+own** (enable the tool's native completion — better than a generated one), or
+**low value** (flat/one-shot, skip). It looks only at your intentionally-
+installed tools (`brew leaves`, `~/.cargo/bin`, `pipx`), not every binary on
+`PATH`, and skips anything that already completes.
+
+### Configuration
+
+| Env var | Default | Effect |
+|---------|---------|--------|
+| `TAB_PLEASE_USER_DIR` | `~/.local/share/tab-please/completions` | where `tab-please add` writes |
+| `TAB_PLEASE_FZF_PREVIEW` | `1` | set `0` to disable the fzf-tab `--help` preview |
+
+tab-please **appends** to `fpath`, so any tool's own completion (gh's dynamic
+one, docker's, …) always wins — it only fills gaps.
+
 ## Supported tools
 
 Completions tab-please **ships** in `dist/` — installed by the plugin or brew:
@@ -69,6 +155,7 @@ Completions tab-please **ships** in `dist/` — installed by the plugin or brew:
 | Tool | Format | Notes |
 |------|--------|-------|
 | `claude` | commander | generated + enriched (dynamic MCP/plugin completions) |
+| `gemini` | yargs | generated (mcp · extensions · skills · hooks · gemma) |
 | `wrangler` | yargs | generated |
 | `gh` | cobra | generated |
 

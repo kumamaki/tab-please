@@ -24,7 +24,8 @@ jobs:
         run: |
           npm i -g @anthropic-ai/claude-code || true
           npm i -g wrangler || true
-          brew install gh || true   # usually preinstalled on GitHub macOS runners
+          brew install gh || true          # usually preinstalled on GitHub macOS runners
+          brew install gemini-cli || true
 
       - name: Regenerate every tool with an installed CLI
         run: |

@@ -96,6 +96,13 @@ export interface Adapter {
 export interface Enrich {
   /** Relative path to a zsh file injected verbatim at the top (dynamic helpers). */
   helpersFile?: string;
+  /**
+   * Pin the parser's format adapter, overriding auto-detection. Set this when a
+   * tool's --help won't auto-detect — most often `"generic"` for unstructured
+   * getopt help (which is never auto-detected). `regen.ts` reads it so the
+   * choice survives every regeneration instead of being re-detected away.
+   */
+  format?: string;
   /** action overrides, keyed by `"<path>::<selector>"`. */
   actions?: Record<string, string>;
   /** Subcommands to drop from completion (deprecated/hidden), by path. */

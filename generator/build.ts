@@ -25,8 +25,10 @@ const esc = (s: string) =>
     .replace(/\s+/g, " ")
     .trim();
 
-/** A command path → a zsh function name: ["claude","auto-mode"] → "_claude_auto_mode". */
-const fnName = (path: string[]) => "_" + path.map((p) => p.replace(/[^a-zA-Z0-9]/g, "_")).join("_");
+/** A command path → a zsh function name: ["sea-orm-cli","generate"] → "_sea-orm-cli_generate".
+ *  Hyphens are KEPT (valid in zsh function names) so the root function matches the
+ *  `#compdef <cmd>` tag, the filename, and the footer; only other punctuation is sanitized. */
+const fnName = (path: string[]) => "_" + path.map((p) => p.replace(/[^a-zA-Z0-9-]/g, "_")).join("_");
 
 /** Path key used to look up enrichment: root = "", else space-joined sans binary. */
 const pathKey = (path: string[]) => path.slice(1).join(" ");
@@ -145,7 +147,10 @@ async function main() {
   const outIdx = args.indexOf("--out");
   const out = outIdx >= 0 ? args[outIdx + 1] : resolve(ROOT, "dist", `_${tool}`);
 
-  const genPath = resolve(ROOT, "tools", tool, "generated.json");
+  // --from <model.json> builds an arbitrary tool (on-demand `tab-please add`),
+  // bypassing the tools/<tool>/ convention. Default is the curated location.
+  const fromIdx = args.indexOf("--from");
+  const genPath = fromIdx >= 0 ? resolve(args[fromIdx + 1]) : resolve(ROOT, "tools", tool, "generated.json");
   if (!existsSync(genPath)) {
     console.error(`missing ${genPath} — run \`bun generator/parse.ts ${tool} --out ${genPath}\` first`);
     process.exit(1);

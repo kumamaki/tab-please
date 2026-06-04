@@ -41,6 +41,8 @@ boolean flags) and is only upgraded where a human binds an action.
 ```
 bun run parse <cmd>      # cmd --help (recursive) → JSON model (stdout, or --out)
 bun run build <cmd>      # generated.json + enrich.ts + helpers.zsh → dist/_<cmd>
+                         #   build also takes --from <model.json> to build an
+                         #   arbitrary tool outside tools/ (used by on-demand)
 bun run regen <cmd>      # parse then build (needs the CLI installed)
 bun run build:all        # rebuild every tool that has a generated.json
 bun run validate         # zsh -n + deterministic smoke test on every dist/_*
@@ -48,10 +50,22 @@ bun run test:fixtures    # detect + parse the tests/fixtures/* --help snapshots
 bun run test             # validate + test:fixtures
 ```
 
+**Two products from one engine:** the *curated collection* (`dist/_*`, enriched,
+CI-fresh) and *on-demand* — the plugin's `tab-please add <tool>` function parses
+any installed CLI's `--help` into `$TAB_PLEASE_USER_DIR` (default
+`~/.local/share/tab-please/completions`) and loads it live. On-demand has no
+enrichment layer (no `enrich.ts`/helpers) — structure + flags + printed choices
+only. Same generator, lower fidelity.
+
+`tab-please scan [--add]` audits installed tools (`brew leaves` + `~/.cargo/bin`
++ `pipx`) against the live `$_comps` map; the shell side finds commands with no
+completion and `generator/scan.ts` classifies each (add / ships-its-own / low
+value). The `$_comps` read must stay shell-side — bun can't see it.
+
 ## Layout
 
 ```
-generator/         parse.ts (driver: detect format + recurse) · build.ts (emitter) · regen.ts · types.ts
+generator/         parse.ts (driver: detect format + recurse) · build.ts (emitter) · regen.ts · scan.ts · types.ts
 generator/parsers/ commander · yargs · cobra · clap · click · argparse · generic · shared.ts
 tools/<cmd>/       generated.json · enrich.ts · helpers.zsh
 dist/              _<cmd>                  published artifacts (committed)
@@ -73,6 +87,11 @@ Action resolution in `build.ts` (first wins): enrich override → parsed
 `_files`) → boolean (no arg) / plain valued. So don't enrich things `--help`
 already expresses; enrich is for dynamic lookups, value sets help omits, and
 file/dir typing the heuristic misses.
+
+`enrich.format` pins the parser format (e.g. `"generic"`). `regen.ts` reads it
+and passes `--format`, so a tool that doesn't auto-detect keeps its format
+across regenerations instead of being re-detected away. The root command is the
+binary name; subcommand nodes inherit the format (one adapter per tree).
 
 ## Dynamic helpers (helpers.zsh)
 
@@ -108,6 +127,10 @@ clap, click, argparse, plus a `generic` getopt fallback (opt-in only).
 
 ## Conventions & gotchas
 
+- **`fnName` keeps hyphens** (`_sea-orm-cli`, not `_sea_orm_cli`). The root
+  function must match the `#compdef <cmd>` tag, the filename, and the footer, or
+  a hyphenated command (`sea-orm-cli`, `tokio-console`) autoloads a name that
+  isn't defined → dead completion. Don't re-mangle them to `_`.
 - The parser rejects non-command lines at the Commands indent (e.g. an embedded
   `Examples:` block) via `isCommandToken` (lowercase-identifier check) — keep it.
 - **Testing:** prefer the deterministic stub smoke test (`scripts/smoke-test.zsh`)
