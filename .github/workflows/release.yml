@@ -1,0 +1,113 @@
+name: release
+
+# Cut a GitHub Release when a vX.Y.Z tag is pushed (by `pnpm ship`), then bump
+# and sync the homebrew formula. The source tarball GitHub attaches already
+# contains the committed dist/_* completions, so there's nothing to build —
+# homebrew installs straight from that archive.
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    # Only the gh CLI runs here (no build), so the cheaper/faster ubuntu runner
+    # is fine — the rest of CI uses macos because it exercises zsh.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history so --generate-notes can diff from the previous tag
+
+      - name: Create the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >
+          gh release create "${GITHUB_REF_NAME}"
+          --verify-tag
+          --generate-notes
+          --title "${GITHUB_REF_NAME}"
+
+  homebrew:
+    # Bump the in-repo formula's url+sha256 for this tag (it's the source of
+    # truth), commit it to main, then copy it into the canonical tap so
+    # `brew install tab-please` resolves the new version.
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main # commit the bump onto main, not the detached tag
+
+      - name: Compute sha256 of the release tarball
+        id: hash
+        run: |
+          set -euo pipefail
+          url="https://github.com/${GITHUB_REPOSITORY}/archive/refs/tags/${GITHUB_REF_NAME}.tar.gz"
+          # GitHub's source tarballs are reproducible, but can lag a beat after
+          # the tag — retry until the archive is downloadable.
+          for _ in 1 2 3 4 5 6 7 8 9 10; do
+            curl -fsSL "$url" -o release.tgz && break
+            sleep 3
+          done
+          sha="$(sha256sum release.tgz | cut -d' ' -f1)"
+          echo "url=$url"    >> "$GITHUB_OUTPUT"
+          echo "sha256=$sha" >> "$GITHUB_OUTPUT"
+          echo "::notice::$GITHUB_REF_NAME → sha256 $sha"
+
+      - name: Rewrite the in-repo formula
+        env:
+          URL: ${{ steps.hash.outputs.url }}
+          SHA: ${{ steps.hash.outputs.sha256 }}
+        run: |
+          set -euo pipefail
+          formula="packaging/homebrew/tab-please.rb"
+          tmp="$(mktemp)"
+          awk -v url="$URL" -v sha="$SHA" '
+            /^[[:space:]]*url / { print "  url \"" url "\""; next }
+            /^[[:space:]]*sha256 / { print "  sha256 \"" sha "\""; next }
+            { print }
+          ' "$formula" > "$tmp" && mv "$tmp" "$formula"
+          # Fail loudly if either line didn't land.
+          grep -qF "url \"$URL\"" "$formula"
+          grep -qF "sha256 \"$SHA\"" "$formula"
+
+      - name: Commit the bump to main
+        run: |
+          set -euo pipefail
+          formula="packaging/homebrew/tab-please.rb"
+          if git diff --quiet -- "$formula"; then
+            echo "formula already current — nothing to commit"
+          else
+            git config user.name  'github-actions[bot]'
+            git config user.email 'github-actions[bot]@users.noreply.github.com'
+            git add "$formula"
+            git commit -m "chore: bump homebrew formula to ${GITHUB_REF_NAME}"
+            git push origin main
+          fi
+
+      - name: Check out the tap
+        uses: actions/checkout@v4
+        with:
+          repository: kumamaki/homebrew-tap
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          path: tap
+
+      - name: Sync formula into the tap
+        working-directory: tap
+        run: |
+          set -euo pipefail
+          mkdir -p Formula
+          cp ../packaging/homebrew/tab-please.rb Formula/tab-please.rb
+          git config user.name  'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add Formula/tab-please.rb
+          if git diff --cached --quiet; then
+            echo "tap formula already current — nothing to push"
+          else
+            git commit -m "tab-please ${GITHUB_REF_NAME#v}"
+            git push
+          fi

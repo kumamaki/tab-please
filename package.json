@@ -12,7 +12,8 @@
     "build:all": "for d in tools/*/; do t=$(basename \"$d\"); if [ -f \"$d/generated.json\" ]; then bun generator/build.ts \"$t\"; fi; done",
     "validate": "zsh scripts/validate.zsh",
     "test:fixtures": "bun tests/parser-fixtures.ts",
-    "test": "zsh scripts/validate.zsh && bun tests/parser-fixtures.ts"
+    "test": "zsh scripts/validate.zsh && bun tests/parser-fixtures.ts",
+    "ship": "scripts/release.sh"
   },
   "devDependencies": {
     "typescript": "^5"
