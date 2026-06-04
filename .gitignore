@@ -1,0 +1,10 @@
+node_modules/
+*.log
+.DS_Store
+
+# Bun
+bun.lockb
+bun.lock
+
+# dist/ and tools/*/generated.json ARE committed — they're the published
+# artifacts and the parse snapshots. Do not ignore them.

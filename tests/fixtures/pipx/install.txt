@@ -1,0 +1,105 @@
+usage: pipx install [-h] [--quiet] [--verbose] [--global] [--include-deps]
+                    [--force] [--suffix SUFFIX] [--python PYTHON]
+                    [--fetch-python {always,missing,never} |
+                    --fetch-missing-python] [--preinstall PREINSTALL]
+                    [--system-site-packages] [--index-url INDEX_URL]
+                    [--editable] [--pip-args PIP_ARGS] [--backend {pip,uv}]
+                    package_spec [package_spec ...]
+
+The install command is the preferred way to globally install apps
+from python packages on your system. It creates an isolated virtual
+environment for the package, then ensures the package's apps are
+accessible on your $PATH. The package's manual pages installed in
+share/man/man[1-9] can be viewed with man on an operating system where
+it is available and the path in the environment variable `PIPX_MAN_DIR`
+(default: /Users/mehdi/.local/share/man) is in the man search path
+($MANPATH).
+
+The result: apps you can run from anywhere, located in packages
+you can cleanly upgrade or uninstall. Guaranteed to not have
+dependency version conflicts or interfere with your OS's python
+packages. 'sudo' is not required to do this.
+
+pipx install PACKAGE_SPEC ...
+pipx install --python PYTHON PACKAGE_SPEC
+pipx install VCS_URL
+pipx install ./LOCAL_PATH
+pipx install ZIP_FILE
+pipx install TAR_GZ_FILE
+
+The PACKAGE_SPEC argument is passed directly to `pip install`.
+
+Virtual Environments will be installed to `$PIPX_HOME/venvs`.
+The default pipx home location is /Users/mehdi/.local/pipx and can
+be overridden by setting the environment variable `PIPX_HOME`.
+If the `--global` option is used, the default pipx home location
+instead is /opt/pipx and can be overridden
+by setting the environment variable `PIPX_GLOBAL_HOME`.
+
+The default app location is /Users/mehdi/.local/bin and can be
+overridden by setting the environment variable `PIPX_BIN_DIR`.
+If the `--global` option is used, the default app location instead
+is /usr/local/bin and can be overridden by
+setting the environment variable `PIPX_GLOBAL_BIN_DIR`.
+
+The default manual pages location is /Users/mehdi/.local/share/man and
+can be overridden by setting the environment variable `PIPX_MAN_DIR`.
+If the `--global` option is used, the default manual pages location
+instead is /usr/local/share/man and can be overridden
+by setting the environment variable `PIPX_GLOBAL_MAN_DIR`.
+
+The default python executable used to install a package is
+/opt/homebrew/opt/python@3.14/libexec/bin/python and can be overridden
+by setting the environment variable `PIPX_DEFAULT_PYTHON`.
+
+positional arguments:
+  package_spec          package name(s) or pip installation spec(s)
+
+options:
+  -h, --help            show this help message and exit
+  --quiet, -q           Give less output. May be used multiple times
+                        corresponding to the ERROR and CRITICAL logging
+                        levels. The count maxes out at 2.
+  --verbose, -v         Give more output. May be used multiple times
+                        corresponding to the INFO, DEBUG and NOTSET logging
+                        levels. The count maxes out at 3.
+  --global              Perform action globally for all users.
+  --include-deps        Include apps of dependent packages
+  --force, -f           Modify existing virtual environment and files in
+                        PIPX_BIN_DIR and PIPX_MAN_DIR
+  --suffix SUFFIX       Optional suffix for virtual environment and executable
+                        names.
+  --python PYTHON       Python to install with. Possible values can be the
+                        executable name (python3.11), the version of an
+                        available system Python or to pass to py launcher
+                        (3.11), or the full path to the executable. Requires
+                        Python 3.10 or above.
+  --fetch-python {always,missing,never}
+                        When to fetch a standalone Python build from python-
+                        build-standalone. 'always' always downloads (ignores
+                        any system Python); 'missing' downloads only when the
+                        requested version is not found locally; 'never' never
+                        downloads. Defaults to PIPX_FETCH_PYTHON, or 'never'.
+  --fetch-missing-python
+                        Deprecated: alias for --fetch-python=missing.
+  --preinstall PREINSTALL
+                        Optional package to be installed into the Virtual
+                        Environment before installing the main package. Use
+                        this flag multiple times if you want to preinstall
+                        multiple packages.
+  --system-site-packages
+                        Give the virtual environment access to the system
+                        site-packages dir.
+  --index-url, -i INDEX_URL
+                        Base URL of Python Package Index
+  --editable, -e        Install a project in editable mode
+  --pip-args PIP_ARGS   Arbitrary pip arguments to pass directly to pip
+                        install/upgrade commands. Under the uv backend a small
+                        subset is translated (--index-url, --extra-index-url,
+                        --find-links, --pre); other flags raise an error so
+                        behaviour stays explicit.
+  --backend {pip,uv}    Backend used for creating venvs and managing packages.
+                        Defaults to PIPX_DEFAULT_BACKEND when set, else 'uv'
+                        when uv is available (via the `pipx[uv]` extra or on
+                        PATH), else 'pip'. Existing venvs always honor their
+                        recorded backend unless this flag is given.

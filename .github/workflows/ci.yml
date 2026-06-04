@@ -1,0 +1,35 @@
+name: ci
+
+# Validate on every push/PR. Does NOT need the CLIs installed — it builds from
+# the committed generated.json snapshots and checks the output.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-and-validate:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Build all completions from committed snapshots
+        run: bun run build:all
+
+      - name: Fail if dist/ is out of sync with sources
+        run: |
+          if ! git diff --quiet -- dist; then
+            echo "::error::dist/ is stale — run \`bun run build:all\` and commit."
+            git --no-pager diff -- dist
+            exit 1
+          fi
+
+      - name: Validate (zsh -n + smoke test every completion)
+        run: zsh scripts/validate.zsh
+
+      - name: Parser fixtures (detect + parse real-world --help snapshots)
+        run: bun tests/parser-fixtures.ts

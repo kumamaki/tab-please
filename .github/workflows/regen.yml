@@ -1,0 +1,55 @@
+name: regen
+
+# Refresh completions from the latest CLI releases. This is the freshness
+# engine: it installs each tool, re-parses its --help, rebuilds, and opens a PR
+# when anything changed. New subcommands/flags land here automatically; a human
+# only steps in to enrich (bind value actions) where it adds value.
+on:
+  schedule:
+    - cron: "0 7 * * 1" # Mondays 07:00 UTC
+  workflow_dispatch:
+
+jobs:
+  regen:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      # Install the CLIs we generate for. Each tool owns how it's installed;
+      # add new tools here as the collection grows.
+      - name: Install CLIs
+        run: |
+          npm i -g @anthropic-ai/claude-code || true
+          npm i -g wrangler || true
+          brew install gh || true   # usually preinstalled on GitHub macOS runners
+
+      - name: Regenerate every tool with an installed CLI
+        run: |
+          for d in tools/*/; do
+            t=$(basename "$d")
+            if command -v "$t" >/dev/null 2>&1; then
+              echo "regenerating $t"
+              bun generator/regen.ts "$t" || echo "::warning::regen failed for $t"
+            else
+              echo "::notice::$t not installed, skipping"
+            fi
+          done
+
+      - name: Validate
+        run: zsh scripts/validate.zsh
+
+      - name: Open PR on change
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: regen/auto
+          title: "chore: regenerate completions from latest CLIs"
+          commit-message: "chore: regenerate completions from latest CLIs"
+          body: |
+            Automated regeneration from the latest CLI `--help`.
+
+            Review the diff: brand-new subcommands/flags appear as **boolean**
+            until enriched. Add value actions in `tools/<tool>/enrich.ts` where
+            it helps (dynamic lookups, choice sets, file/dir typing).

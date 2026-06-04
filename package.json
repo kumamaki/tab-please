@@ -1,0 +1,23 @@
+{
+  "name": "tab-please",
+  "version": "0.1.0",
+  "description": "Generated + enriched zsh completions for popular CLIs — fresh from each tool's --help, hand-tuned where it counts.",
+  "license": "WTFPL",
+  "type": "module",
+  "private": false,
+  "scripts": {
+    "parse": "bun generator/parse.ts",
+    "build": "bun generator/build.ts",
+    "regen": "bun generator/regen.ts",
+    "build:all": "for d in tools/*/; do t=$(basename \"$d\"); if [ -f \"$d/generated.json\" ]; then bun generator/build.ts \"$t\"; fi; done",
+    "validate": "zsh scripts/validate.zsh",
+    "test:fixtures": "bun tests/parser-fixtures.ts",
+    "test": "zsh scripts/validate.zsh && bun tests/parser-fixtures.ts"
+  },
+  "devDependencies": {
+    "typescript": "^5"
+  },
+  "engines": {
+    "bun": ">=1.0.0"
+  }
+}
