@@ -104,6 +104,53 @@ fpath=(/path/to/tab-please/dist $fpath)
 
 After any of these, reload your shell with `exec zsh`.
 
+## Recommended zsh setup
+
+### compinit and load order
+
+`compinit` must run after your full `fpath` is built. Plugin managers handle this; for a bare setup, the order is:
+
+```zsh
+fpath=(/path/to/tab-please/dist $fpath)   # fpath first
+autoload -Uz compinit && compinit          # then compinit
+                                           # then fzf-tab, if you use it
+```
+
+### zstyle
+
+In `~/.zshrc`, after `compinit`:
+
+```zsh
+zstyle ':completion:*' menu select                       # arrow-key navigation
+zstyle ':completion:*' group-name ''                     # group by kind
+zstyle ':completion:*:descriptions' format '[%d]'        # show group headers
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'  # case-insensitive
+```
+
+### fzf + fzf-tab
+
+[fzf-tab](https://github.com/Aloxaf/fzf-tab) replaces zsh's default menu with fzf: searchable, filterable. tab-please wires its preview pane to render each subcommand's `--help` as you scroll (see [fzf-tab help previews](#fzf-tab-help-previews)).
+
+```zsh
+brew install fzf
+```
+
+Load fzf-tab **after** `compinit`; it patches the completion system at startup:
+
+```zsh
+# zinit
+zinit light Aloxaf/fzf-tab
+
+# zap
+plug "Aloxaf/fzf-tab"
+```
+
+To switch between completion groups in the fzf menu:
+
+```zsh
+zstyle ':fzf-tab:*' switch-group '<' '>'
+```
+
 ## Usage
 
 ### Shipped completions
