@@ -8,7 +8,7 @@ class TabPlease < Formula
   desc "Generated + enriched zsh completions for popular CLIs"
   homepage "https://github.com/kumamaki/tab-please"
   url "https://github.com/kumamaki/tab-please/archive/refs/tags/v0.1.0.tar.gz"
-  sha256 "0000000000000000000000000000000000000000000000000000000000000000"
+  sha256 "33a59cc537d5b236d0885e033fcb3a8174a6d54e015fec5e3fcb6843bc833efc"
   license "WTFPL"
 
   def install
