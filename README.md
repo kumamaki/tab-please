@@ -43,7 +43,18 @@ regenerates; your enrichment is keyed by command path, so it survives the refres
 
 ## Install
 
-**zsh plugin** (zap / zinit / antidote / oh-my-zsh):
+Two ways in, and they're **not** equivalent — pick by how much you want:
+
+| | curated completions | `tab-please add/scan/request` | fzf-tab `--help` preview |
+|---|:---:|:---:|:---:|
+| **zsh plugin** | ✓ | ✓ | ✓ |
+| **Homebrew** | ✓ | ✗ | ✗ |
+
+So yes — if all you want is the shipped tools (`claude`, `gemini`, `wrangler`,
+`gh`) to complete, **Homebrew alone is enough; you can skip the plugin.** Want the
+on-demand commands or the preview too? Use the plugin.
+
+### zsh plugin (recommended)
 
 ```zsh
 # zap
@@ -52,30 +63,46 @@ plug "kumamaki/tab-please"
 # zinit
 zinit light kumamaki/tab-please
 
-# antidote  → add to your plugins file:
+# antidote → add to your plugins file:
 kumamaki/tab-please
-
-# oh-my-zsh → clone into custom/plugins, then add `tab-please` to plugins=()
 ```
 
-**Homebrew:**
+**oh-my-zsh** — clone into oh-my-zsh's custom plugins dir:
+
+```zsh
+git clone https://github.com/kumamaki/tab-please \
+  "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/tab-please"
+```
+
+then add it to the plugin list in `~/.zshrc` (space-separated, **no commas**):
+
+```zsh
+plugins=(git … tab-please)
+```
+
+### Homebrew
 
 ```zsh
 brew tap kumamaki/tap
 brew install tab-please
 ```
 
-> Homebrew installs the **curated completions only** (`dist/_*`). The on-demand
-> commands — `tab-please add` / `scan` / `request` — and the fzf-tab preview live
-> in the zsh plugin; install via a plugin manager (above) for those.
+Brew installs the curated completions (`dist/_*`) into its zsh `site-functions`
+dir. In a standard Homebrew setup that dir is already on your `fpath`, so
+`compinit` autoloads them — no plugin, no extra config. That's the same reason
+brew **can't** give you the `tab-please` command or the fzf-tab preview: those are
+shell code the plugin sources at startup, and a completions-only install never
+runs them.
 
-**Bare** (no manager): clone, then in `~/.zshrc` before `compinit`:
+### Bare (no manager)
+
+Clone, then in `~/.zshrc` **before** `compinit`:
 
 ```zsh
 fpath=(/path/to/tab-please/dist $fpath)
 ```
 
-After installing, `exec zsh`.
+After any of these, reload your shell with `exec zsh`.
 
 ## Usage
 
