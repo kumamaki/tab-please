@@ -21,18 +21,31 @@ fpath=($fpath "${_TAB_PLEASE_DIR}/dist" "${_TAB_PLEASE_DIR}/completions" "${_TAB
 
 # Mark each completion for autoload — but skip any name something else already
 # provides (e.g. `source <(gh completion -s zsh)`), so we never replace a richer
-# completion. Ours self-register via their guarded footer on init.
+# completion.
+#
+# Init order matters here:
+#   · compinit hasn't run yet (omz, most managers): just autoload. compinit will
+#     scan our just-appended fpath dirs and register the `#compdef` tags itself.
+#   · compinit already ran (sourced late; some managers compinit first): its dump
+#     is frozen — `compinit -C` would NOT rescan our new dirs, so the tags never
+#     fire this session. So we bind each completion ourselves with `compdef`, but
+#     only when nothing already completes that command, so a tool's own (richer)
+#     completion still wins. `compdef` exists only once compinit has run, which is
+#     exactly the case where we need it — so its presence is the branch condition.
+#
+# Relies on the repo invariant (CLAUDE.md): filename `_cmd` ↔ command `cmd` ↔
+# `#compdef cmd`, so `${f#_}` is the command name.
 () {
-  local f
+  local f cmd
   for f in "${_TAB_PLEASE_DIR}/dist"/_*(N:t) "${_TAB_PLEASE_DIR}/completions"/_*(N:t) "${_TAB_PLEASE_USER_DIR}"/_*(N:t); do
     (( $+functions[$f] )) && continue
     autoload -Uz -- "$f"
+    cmd=${f#_}
+    if (( $+functions[compdef] )) && [[ -z ${_comps[$cmd]} ]]; then
+      compdef "$f" "$cmd"
+    fi
   done
 }
-
-# If compinit already ran (some managers init completions before sourcing
-# plugins), rescan so our additions take effect this session.
-(( $+functions[compinit] )) && compinit -C 2>/dev/null
 
 # `tab-please` — manage on-demand completions. On-demand ones are lower fidelity
 # than the curated tools (structure + flags + printed choices, but no enrichment:
