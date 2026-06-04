@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="./assets/logo.png" alt="tab-please logo" width="360">
+</p>
+
 # tab-please
 
 Fresh zsh completions for CLIs — a curated set **and** on demand for anything.
