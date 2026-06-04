@@ -1,0 +1,29 @@
+OVERVIEW: Mac App Store command-line interface
+
+USAGE: mas <subcommand>
+
+OPTIONS:
+  --version               Show the version.
+  -h, --help              Show help information.
+
+SUBCOMMANDS:
+  config                  Output mas config & related system info
+  get, purchase           Get & install free apps from the App Store
+  home                    Open App Store app pages in the default web browser
+  install                 Install previously gotten apps from the App Store
+  list                    List apps installed from the App Store
+  lookup, info            Output app info from the App Store
+  lucky                   Install the first app returned from searching the App
+                          Store
+  open                    Open app page in 'App Store.app'
+  outdated                List pending app updates from the App Store
+  reset                   Reset App Store processes & clear cached App Store
+                          downloads
+  search                  Search for apps in the App Store
+  seller, vendor          Open apps' seller pages in the default web browser
+  signout                 Sign out of the App Store
+  uninstall               Uninstall apps installed from the App Store
+  update, upgrade         Update outdated apps installed from the App Store
+  version                 Output version number
+
+  See 'mas help <subcommand>' for detailed help.

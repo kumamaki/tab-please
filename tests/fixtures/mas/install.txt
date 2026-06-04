@@ -1,0 +1,15 @@
+OVERVIEW: Install previously gotten apps from the App Store
+
+Requires root privileges to install apps
+
+USAGE: mas install [--force] [--bundle] <app-id> ...
+
+ARGUMENTS:
+  <app-id>                App ID
+
+OPTIONS:
+  --force                 Force reinstall
+  --bundle                Process all app IDs as bundle IDs
+  --version               Show the version.
+  -h, --help              Show help information.
+

@@ -14,7 +14,7 @@ import type { Adapter, CliCommand, CliModel, SubRef } from "./types.ts";
 // Most specific first; commander is the broad fallback. `generic` is never
 // auto-detected (opt in with --format generic). Exported so the fixture test
 // (tests/) exercises the real detection, not a copy of this list.
-export const DETECT_ORDER = ["cobra", "argparse", "yargs", "clap", "click", "commander"];
+export const DETECT_ORDER = ["cobra", "argparse", "yargs", "clap", "click", "swift-ap", "oclif", "commander"];
 
 export async function loadAdapter(name: string): Promise<Adapter> {
   const mod = await import(resolve(import.meta.dir, "parsers", `${name}.ts`));

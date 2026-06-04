@@ -65,6 +65,14 @@ const FIXTURES: Fixture[] = [
     { file: "root.txt", minSubs: 3, minFlags: 15 },
     { file: "mcp.txt", minSubs: 3, minFlags: 0 },
   ] },
+  { tool: "netlify", format: "oclif", pages: [
+    { file: "root.txt", minSubs: 15, minFlags: 0 },
+    { file: "deploy.txt", minSubs: 0, minFlags: 10 },
+  ] },
+  { tool: "mas", format: "swift-ap", pages: [
+    { file: "root.txt", minSubs: 8, minFlags: 1 },
+    { file: "install.txt", minSubs: 0, minFlags: 2 },
+  ] },
 ];
 
 const fixturePath = (tool: string, file: string) => resolve(import.meta.dir, "fixtures", tool, file);
