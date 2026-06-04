@@ -1,0 +1,51 @@
+#compdef tab-please
+# tab-please's own completion — hand-written, NOT generated.
+#
+# Unlike dist/_*, this can't come from the engine: `tab-please` is a zsh
+# function (see tab-please.plugin.zsh), not a binary on PATH, so parse.ts has
+# nothing to exec. It also lives here, not in dist/, on purpose — dist/ ships to
+# Homebrew users who get the curated completions but NOT the `tab-please`
+# function, so its completion must stay plugin-scoped.
+
+_tab-please() {
+  local state line
+  _arguments -C \
+    '1: :->cmd' \
+    '*:: :->args'
+
+  case $state in
+    cmd)
+      local -a subcmds=(
+        'add:generate a completion for an installed CLI and load it now'
+        'scan:find installed tools with no completion'
+        'request:ask for a tool to be curated (files a GitHub issue)'
+      )
+      _describe -t commands 'tab-please command' subcmds
+      ;;
+    args)
+      case $line[1] in
+        add)
+          _arguments \
+            '1:tool:_command_names -e' \
+            '--format[pin the parser format]:format:(commander yargs cobra clap click argparse generic)'
+          ;;
+        scan)
+          _arguments \
+            '--add[generate the worth-adding ones]'
+          ;;
+        request)
+          _arguments \
+            '1:tool:_command_names -e' \
+            '--force[request even if curated / native / flat]' \
+            '--dry-run[show what would be filed, file nothing]'
+          ;;
+      esac
+      ;;
+  esac
+}
+
+if [[ $funcstack[1] = _tab-please ]]; then
+  _tab-please "$@"
+elif (( $+functions[compdef] )); then
+  compdef _tab-please tab-please
+fi

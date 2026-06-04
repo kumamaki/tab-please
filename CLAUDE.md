@@ -76,6 +76,7 @@ generator/         parse.ts (detect+recurse) · build.ts (emitter) · regen.ts �
 generator/parsers/ commander · yargs · cobra · clap · click · argparse · generic · shared.ts
 tools/<cmd>/       generated.json · enrich.ts · helpers.zsh
 dist/              _<cmd>                  published artifacts (committed)
+completions/       _tab-please             hand-written; the plugin's own completion (see below)
 integrations/      fzf-tab-preview.zsh     subcommand --help in the fzf-tab pane
 scripts/     smoke-test.zsh · validate.zsh
 tests/             fixtures/<tool>/*.txt (committed real --help) · parser-fixtures.ts
@@ -134,6 +135,14 @@ clap, click, argparse, plus a `generic` getopt fallback (opt-in only).
 
 ## Conventions & gotchas
 
+- **`completions/_tab-please` is the one hand-written completion** — and the only
+  one that can't go through the engine. `tab-please` is a zsh *function*, not a
+  binary on PATH, so `parse.ts` has nothing to `--help`. It lives in
+  `completions/`, **not** `dist/`, on purpose: `dist/` ships to Homebrew users,
+  who get the curated completions but **not** the `tab-please` function — so its
+  completion must stay plugin-scoped. The plugin appends `completions/` to fpath
+  and autoloads it alongside `dist/`; `validate.zsh` smoke-tests it too. Editing
+  it by hand is fine (it's not generated); it's not a golden-rule-#1 violation.
 - **`fnName` keeps hyphens** (`_sea-orm-cli`, not `_sea_orm_cli`). The root
   function must match the `#compdef <cmd>` tag, the filename, and the footer, or
   a hyphenated command (`sea-orm-cli`, `tokio-console`) autoloads a name that

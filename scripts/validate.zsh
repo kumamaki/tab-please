@@ -5,7 +5,9 @@ set -u
 
 local here=${0:A:h}
 local rc=0 f cmd
-for f in "${here}/.."/dist/_*(N); do
+# dist/ ships to everyone; completions/ holds the plugin's own hand-written
+# _tab-please. Both get the same smoke test (syntax + clean source-time load).
+for f in "${here}/.."/dist/_*(N) "${here}/.."/completions/_*(N); do
   cmd=${${f:t}#_}
   print "── $cmd ──"
   zsh "${here}/smoke-test.zsh" "$f" "$cmd" || rc=1

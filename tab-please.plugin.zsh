@@ -14,14 +14,17 @@ typeset -g _TAB_PLEASE_DIR=${0:A:h}
 # with duplicate entries.
 typeset -gU fpath
 typeset -g _TAB_PLEASE_USER_DIR=${TAB_PLEASE_USER_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/tab-please/completions}
-fpath=($fpath "${_TAB_PLEASE_DIR}/dist" "${_TAB_PLEASE_USER_DIR}")
+# completions/ holds the plugin's own hand-written completion (_tab-please) — it
+# lives here, not dist/, because it completes the plugin-only `tab-please`
+# function, which Homebrew-only users don't have.
+fpath=($fpath "${_TAB_PLEASE_DIR}/dist" "${_TAB_PLEASE_DIR}/completions" "${_TAB_PLEASE_USER_DIR}")
 
 # Mark each completion for autoload — but skip any name something else already
 # provides (e.g. `source <(gh completion -s zsh)`), so we never replace a richer
 # completion. Ours self-register via their guarded footer on init.
 () {
   local f
-  for f in "${_TAB_PLEASE_DIR}/dist"/_*(N:t) "${_TAB_PLEASE_USER_DIR}"/_*(N:t); do
+  for f in "${_TAB_PLEASE_DIR}/dist"/_*(N:t) "${_TAB_PLEASE_DIR}/completions"/_*(N:t) "${_TAB_PLEASE_USER_DIR}"/_*(N:t); do
     (( $+functions[$f] )) && continue
     autoload -Uz -- "$f"
   done
