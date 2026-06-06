@@ -1,6 +1,6 @@
 {
   "name": "tab-please",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Generated + enriched zsh completions for popular CLIs — fresh from each tool's --help, hand-tuned where it counts.",
   "license": "WTFPL",
   "type": "module",
