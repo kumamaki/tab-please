@@ -33,6 +33,11 @@ const fnName = (path: string[]) => "_" + path.map((p) => p.replace(/[^a-zA-Z0-9-
 /** Path key used to look up enrichment: root = "", else space-joined sans binary. */
 const pathKey = (path: string[]) => path.slice(1).join(" ");
 
+/** Count commands in the tree (root + every descendant) — the user-meaningful
+ *  "how much can I now complete" number the `add` banner reports. */
+const countCommands = (cmd: CliCommand): number =>
+  1 + cmd.subcommands.reduce((n, s) => n + countCommands(s), 0);
+
 const HELP_SPEC = `'(-h --help)'{-h,--help}'[Display help for command]'`;
 
 function resolveFlagAction(
@@ -154,6 +159,9 @@ async function main() {
   }
   const outIdx = args.indexOf("--out");
   const out = outIdx >= 0 ? args[outIdx + 1] : resolve(ROOT, "dist", `_${tool}`);
+  // --quiet: stay off the diagnostics channel and print only the command count
+  // to stdout, for the shell `add` flow to fold into its own success banner.
+  const quiet = args.includes("--quiet");
 
   // --from <model.json> builds an arbitrary tool (on-demand `tab-please add`),
   // bypassing the tools/<tool>/ convention. Default is the curated location.
@@ -196,7 +204,8 @@ async function main() {
 
   const parts = [header, helpers, blocks.join("\n\n"), footer].filter(Boolean);
   writeFileSync(out, parts.join("\n\n") + "\n");
-  console.error(`wrote ${out} (${blocks.length} functions)`);
+  if (quiet) process.stdout.write(`${countCommands(model.root)}\n`);
+  else console.error(`wrote ${out} (${blocks.length} functions)`);
 }
 
 main();

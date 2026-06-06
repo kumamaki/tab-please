@@ -67,13 +67,22 @@ tab-please() {
       (( $+commands[bun] ))   || { print -u2 "tab-please: needs 'bun' on PATH"; return 1 }
       command mkdir -p -- "$_TAB_PLEASE_USER_DIR" || return 1
       local model="$_TAB_PLEASE_USER_DIR/.${tool}.json"
-      if bun "$_TAB_PLEASE_DIR/generator/parse.ts" "$tool" "$@" --out "$model" &&
-         bun "$_TAB_PLEASE_DIR/generator/build.ts" "$tool" --from "$model" --out "$_TAB_PLEASE_USER_DIR/_${tool}"; then
+      local out="$_TAB_PLEASE_USER_DIR/_${tool}"
+      # parse streams a live spinner to stderr (it owns the slow recursion);
+      # build prints just the command count to stdout under --quiet, which we
+      # capture and fold into one clean success banner. Keeps user-facing output
+      # on stdout, off the red diagnostics channel.
+      local ncmd
+      if bun "$_TAB_PLEASE_DIR/generator/parse.ts" "$tool" "$@" --out "$model" --quiet &&
+         ncmd=$(bun "$_TAB_PLEASE_DIR/generator/build.ts" "$tool" --from "$model" --out "$out" --quiet); then
         fpath=($fpath "$_TAB_PLEASE_USER_DIR")
         unfunction "_${tool}" 2>/dev/null
         autoload -Uz "_${tool}"
         (( $+functions[compdef] )) && compdef "_${tool}" "$tool"
-        print -r -- "tab-please: added '${tool}' → ${_TAB_PLEASE_USER_DIR}/_${tool} (active now)"
+        local g d nc
+        if [[ -t 1 && -z $NO_COLOR ]]; then g=$'\e[32m' d=$'\e[2m' nc=$'\e[0m'; fi
+        print -r -- "${g}✓${nc} ${tool} ready ${d}— ${ncmd} commands, active in this shell${nc}"
+        print -r -- "  ${d}${out}${nc}"
       else
         print -u2 "tab-please: failed to generate a completion for '${tool}'"; return 1
       fi
