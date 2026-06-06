@@ -27,8 +27,11 @@ export async function runHelp(cmd: string): Promise<string> {
 
 // Does the tool emit its own zsh completion? (clap_complete, cobra, …) Returns
 // the command that generates it, or null.
+// Bare "completions" is tried first: tools like bun install to a file when
+// given a shell name but fall back to stdout otherwise — making the bare form
+// the only reliable one to suggest to users.
 export async function selfGenerates(cmd: string): Promise<string | null> {
-  for (const args of [["completion", "zsh"], ["gen-completion", "zsh"], ["completions", "zsh"]]) {
+  for (const args of [["completions"], ["completion", "zsh"], ["gen-completion", "zsh"], ["completions", "zsh"]]) {
     try {
       const { stdout } = await pexec(cmd, args, SAFE);
       if (/#compdef\b/.test(stdout)) return `${cmd} ${args.join(" ")}`;
