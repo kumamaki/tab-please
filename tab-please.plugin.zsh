@@ -58,37 +58,58 @@ fpath=($fpath "${_TAB_PLEASE_DIR}/dist" "${_TAB_PLEASE_DIR}/completions" "${_TAB
 tab-please() {
   emulate -L zsh
   setopt local_options null_glob
+  # Color only when the relevant stream is a TTY and NO_COLOR is unset.
+  local g y r d b c nc
+  if [[ -z $NO_COLOR ]]; then
+    [[ -t 1 || -t 2 ]] && { g=$'\e[32m' y=$'\e[33m' r=$'\e[31m' d=$'\e[2m' b=$'\e[1m' c=$'\e[36m' nc=$'\e[0m' }
+  fi
   local sub=$1; (( $# )) && shift
   case $sub in
     add)
       local tool=$1; (( $# )) && shift
-      [[ -n $tool ]] || { print -u2 "usage: tab-please add <tool> [--format <name>]"; return 1 }
-      (( $+commands[$tool] )) || { print -u2 "tab-please: '$tool' is not an installed command"; return 1 }
-      (( $+commands[bun] ))   || { print -u2 "tab-please: needs 'bun' on PATH"; return 1 }
+      [[ -n $tool ]] || { print -u2 "${y}⚠${nc} usage: tab-please add <tool> [--format <name>]"; return 1 }
+      (( $+commands[$tool] )) || { print -u2 "${r}✗${nc} '${tool}' is not an installed command"; return 1 }
+      (( $+commands[bun] ))   || { print -u2 "${r}✗${nc} needs ${b}bun${nc} on PATH"; return 1 }
       command mkdir -p -- "$_TAB_PLEASE_USER_DIR" || return 1
       local model="$_TAB_PLEASE_USER_DIR/.${tool}.json"
       local out="$_TAB_PLEASE_USER_DIR/_${tool}"
-      # parse streams a live spinner to stderr (it owns the slow recursion);
-      # build prints just the command count to stdout under --quiet, which we
-      # capture and fold into one clean success banner. Keeps user-facing output
-      # on stdout, off the red diagnostics channel.
-      local ncmd
+      # parse streams a live spinner to stderr (slow recursive --help);
+      # build --quiet prints a machine line: commands|functions|format|version
+      # which we fold into one success banner on stdout.
+      zmodload -F zsh/datetime p:EPOCHREALTIME 2>/dev/null
+      local start=${EPOCHREALTIME:-$SECONDS} meta ncmd nfn format version elapsed
       if bun "$_TAB_PLEASE_DIR/generator/parse.ts" "$tool" "$@" --out "$model" --quiet &&
-         ncmd=$(bun "$_TAB_PLEASE_DIR/generator/build.ts" "$tool" --from "$model" --out "$out" --quiet); then
+         meta=$(bun "$_TAB_PLEASE_DIR/generator/build.ts" "$tool" --from "$model" --out "$out" --quiet); then
         fpath=($fpath "$_TAB_PLEASE_USER_DIR")
         unfunction "_${tool}" 2>/dev/null
         autoload -Uz "_${tool}"
         (( $+functions[compdef] )) && compdef "_${tool}" "$tool"
-        local g d nc
-        if [[ -t 1 && -z $NO_COLOR ]]; then g=$'\e[32m' d=$'\e[2m' nc=$'\e[0m'; fi
-        print -r -- "${g}✓${nc} ${tool} ready ${d}— ${ncmd} commands, active in this shell${nc}"
-        print -r -- "  ${d}${out}${nc}"
+        local -a parts
+        parts=("${(@s:|:)meta}")
+        ncmd=${parts[1]:-?}
+        nfn=${parts[2]:-?}
+        format=${parts[3]:-?}
+        version=${parts[4]:-?}
+        # Prefer sub-second precision when zsh/datetime is available.
+        local end=${EPOCHREALTIME:-$SECONDS}
+        local dt=$(( end - start ))
+        if (( dt < 1 )); then
+          elapsed="$(printf '%dms' $(( dt * 1000 )))"
+        else
+          elapsed=$(printf '%.1fs' $dt)
+        fi
+        # Prefer TTY-aware colors on stdout for the banner.
+        local og od onc
+        if [[ -t 1 && -z $NO_COLOR ]]; then og=$'\e[32m' od=$'\e[2m' onc=$'\e[0m'; fi
+        print -r -- "${og}✓${onc} ${tool} ready ${od}· ${ncmd} commands · ${format} · ${elapsed}${onc}"
+        print -r -- "  ${od}${out}${onc}"
       else
-        print -u2 "tab-please: failed to generate a completion for '${tool}'"; return 1
+        print -u2 "${r}✗${nc} failed to generate a completion for '${tool}'"
+        return 1
       fi
       ;;
     scan)
-      (( $+commands[bun] )) || { print -u2 "tab-please: needs 'bun' on PATH"; return 1 }
+      (( $+commands[bun] )) || { print -u2 "${r}✗${nc} needs ${b}bun${nc} on PATH"; return 1 }
       # formula/alias name → real command, for the few that differ
       local -A rename=(
         ripgrep rg  cloudflare-wrangler wrangler  git-delta delta  tlrc tldr
@@ -111,26 +132,37 @@ tab-please() {
         cand+=$cmd
       done
       if (( ! $#cand )); then
-        print "tab-please: every installed tool already completes ✓"
+        local og onc
+        if [[ -t 1 && -z $NO_COLOR ]]; then og=$'\e[32m' onc=$'\e[0m'; fi
+        print "${og}✓${onc} every installed tool already completes"
         return 0
       fi
-      print -u2 "tab-please: ${#cand} installed tools have no completion — classifying…"
+      # Bun owns the live spinner + colored report on stderr. Keep this line
+      # short so it doesn't compete with the progress UI that follows.
+      print -u2 "${d}found ${#cand} tools with no completion${nc}"
       local add
       add=$(bun "$_TAB_PLEASE_DIR/generator/scan.ts" ${(u)cand})
       if [[ $1 == --add && -n $add ]]; then
-        local c
-        for c in ${(f)add}; do tab-please add "$c"; done
+        local -a tools=(${(f)add})
+        local i=0 n=${#tools} toolname plural
+        plural=tools; (( n == 1 )) && plural=tool
+        print -u2 "${d}adding ${n} ${plural}…${nc}"
+        for toolname in $tools; do
+          (( i++ ))
+          print -u2 "${c}adding ${i}/${n}${nc} ${d}·${nc} ${b}${toolname}${nc}"
+          tab-please add "$toolname" || print -u2 "${y}⚠${nc} skipped '${toolname}' after failure"
+        done
       fi
       ;;
     request)
-      (( $+commands[bun] )) || { print -u2 "tab-please: needs 'bun' on PATH"; return 1 }
+      (( $+commands[bun] )) || { print -u2 "${r}✗${nc} needs ${b}bun${nc} on PATH"; return 1 }
       bun "$_TAB_PLEASE_DIR/generator/request.ts" "$@"
       ;;
     *)
-      print -u2 "usage: tab-please <command>
-  add <tool> [--format <name>]   generate a completion for an installed CLI
-  scan [--add]                   find installed tools with no completion
-  request <tool> [--force]       ask for a tool to be curated (files a GitHub issue)"
+      print -u2 "usage: ${b}tab-please${nc} <command>
+  ${c}add${nc} <tool> [--format <name>]   generate a completion for an installed CLI
+  ${c}scan${nc} [--add]                   find installed tools with no completion
+  ${c}request${nc} <tool> [--force]       ask for a tool to be curated (files a GitHub issue)"
       return 1
       ;;
   esac

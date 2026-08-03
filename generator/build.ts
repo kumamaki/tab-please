@@ -10,6 +10,7 @@
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 import type { CliCommand, CliFlag, CliModel, Enrich } from "./types.ts";
+import { dim, green, symbols } from "./ui.ts";
 
 const ROOT = resolve(import.meta.dir, "..");
 
@@ -204,8 +205,19 @@ async function main() {
 
   const parts = [header, helpers, blocks.join("\n\n"), footer].filter(Boolean);
   writeFileSync(out, parts.join("\n\n") + "\n");
-  if (quiet) process.stdout.write(`${countCommands(model.root)}\n`);
-  else console.error(`wrote ${out} (${blocks.length} functions)`);
+  const commands = countCommands(model.root);
+  const functions = blocks.length;
+  if (quiet) {
+    // Machine line for the shell `add` banner. Pipe `|` is rare in versions;
+    // order: commands | functions | format | version
+    process.stdout.write(
+      `${commands}|${functions}|${model.format}|${model.version ?? "?"}\n`,
+    );
+  } else {
+    console.error(
+      `${green(symbols.ok)} wrote ${out} ${dim(`(${functions} functions · ${commands} commands)`)}`,
+    );
+  }
 }
 
 main();

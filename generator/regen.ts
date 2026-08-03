@@ -10,6 +10,7 @@ import { execFileSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import type { Enrich } from "./types.ts";
+import { dim, green, symbols } from "./ui.ts";
 
 const ROOT = resolve(import.meta.dir, "..");
 
@@ -36,4 +37,6 @@ async function pinnedFormat(): Promise<string | undefined> {
 const format = await pinnedFormat();
 run("parse.ts", [tool, "--out", gen, ...(format ? ["--format", format] : [])]);
 run("build.ts", [tool]);
-console.error(`regenerated ${tool}${format ? ` (--format ${format})` : ""}`);
+console.error(
+  `${green(symbols.ok)} regenerated ${tool}${format ? dim(` ${symbols.sep} --format ${format}`) : ""}`,
+);

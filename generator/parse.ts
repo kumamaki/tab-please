@@ -10,6 +10,7 @@ import { execFileSync } from "node:child_process";
 import { writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import type { Adapter, CliCommand, CliModel, SubRef } from "./types.ts";
+import { dim, green, makeSpinner, symbols, type Spinner } from "./ui.ts";
 
 // Most specific first; commander is the broad fallback. `generic` is never
 // auto-detected (opt in with --format generic). Exported so the fixture test
@@ -66,39 +67,24 @@ function getVersion(command: string): string | undefined {
 
 // Live progress for the recursive probe. The recursion blocks on one
 // execFileSync per node, so the slowness is invisible from the shell — only the
-// driver can report it. We render a single self-erasing line on stderr (the
-// diagnostics channel; stdout stays the JSON/result), advancing one spinner
-// frame per node so the label tracks exactly which `--help` is in flight.
-// Warnings clear the line, print, then let it resume — nothing gets mangled.
-const SPINNER = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
-
+// driver can report it. Shared spinner on stderr; stdout stays the JSON/result.
 type Progress = { tick(path: string[]): void; warn(msg: string): void; done(): number };
 
 function makeProgress(command: string): Progress {
-  const tty = !!process.stderr.isTTY && !process.env.TAB_PLEASE_NO_PROGRESS;
-  const color = tty && !process.env.NO_COLOR;
-  const dim = (s: string) => (color ? `\x1b[2m${s}\x1b[0m` : s);
-  let frame = 0;
+  const spinner: Spinner = makeSpinner({ verb: "probing", subject: command });
   let count = 0;
-  const clear = () => tty && process.stderr.write("\r\x1b[K");
-  const render = (label: string) => {
-    if (!tty) return;
-    const where = label ? ` ${dim("›")} ${label}` : "";
-    process.stderr.write(`\r${dim(SPINNER[frame % SPINNER.length])} probing ${command}${where}  ${dim(`(${count})`)}\x1b[K`);
-  };
   return {
     tick(path) {
       count++;
-      frame++;
-      render(path.join(" "));
+      const label = path.length ? path.join(" ") : "";
+      spinner.set(label);
+      spinner.tick(count);
     },
     warn(msg) {
-      clear();
-      console.error(msg);
-      render("");
+      spinner.warn(msg);
     },
     done() {
-      clear();
+      spinner.done();
       return count;
     },
   };
@@ -121,7 +107,9 @@ function buildTree(
   try {
     page = adapter.parsePage(runHelp(command, args));
   } catch (err: any) {
-    progress.warn(`  ⚠ skipping \`${command} ${path.join(" ")}\`: ${String(err?.message ?? err).split("\n")[0]}`);
+    progress.warn(
+      `  ${symbols.warn} skipping \`${command} ${path.join(" ")}\`: ${String(err?.message ?? err).split("\n")[0]}`,
+    );
     page = { flags: [], subcommands: [], positionals: [] };
   }
 
@@ -166,13 +154,17 @@ async function main() {
 
   const progress = makeProgress(command);
   const root = buildTree(adapter, command, [], 0, maxDepth, progress);
-  progress.done();
+  const nodes = progress.done();
   const model: CliModel = { command, version: getVersion(command), format: adapter.name, root };
   const json = JSON.stringify(model, null, 2) + "\n";
 
   if (out) {
     writeFileSync(out, json);
-    if (!quiet) console.error(`wrote ${out} — format=${adapter.name}, version=${model.version ?? "?"}`);
+    if (!quiet) {
+      console.error(
+        `${green(symbols.ok)} wrote ${out} ${dim(`${symbols.sep} ${adapter.name} ${symbols.sep} ${model.version ?? "?"} ${symbols.sep} ${nodes} pages`)}`,
+      );
+    }
   } else {
     process.stdout.write(json);
   }

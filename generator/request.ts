@@ -13,6 +13,7 @@ import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { promisify } from "node:util";
 import { classify, toolVersion } from "./classify.ts";
+import { cyan, dim, green, makeSpinner, red, symbols, yellow } from "./ui.ts";
 
 const pexec = promisify(execFile);
 const SAFE = { cwd: tmpdir(), maxBuffer: 8 * 1024 * 1024 } as const;
@@ -30,7 +31,7 @@ if (!tool) {
 }
 
 const refuse = (msg: string): never => {
-  console.error(`tab-please: ${msg}`);
+  console.error(`${yellow(symbols.warn)} ${msg}`);
   process.exit(1);
 };
 
@@ -45,26 +46,45 @@ async function installed(cmd: string): Promise<boolean> {
 
 // ── vet ──────────────────────────────────────────────────────────────────────
 if (existsSync(resolve(ROOT, "dist", `_${tool}`)) && !force) {
-  refuse(`'${tool}' is already curated — it ships with tab-please and completes once the plugin is loaded. Nothing to request.`);
+  refuse(
+    `'${tool}' is already curated — it ships with tab-please and completes once the plugin is loaded. Nothing to request.`,
+  );
 }
+
+const spinner = makeSpinner({ verb: "vetting", subject: tool });
+spinner.tick();
 
 let body: string;
 if (!(await installed(tool))) {
+  spinner.done();
   body =
     `Requesting a curated tab-please completion for **${tool}**.\n\n` +
     `_Not installed locally, so no auto-detected context._\n\n` +
     `Why curate (vs \`tab-please add\` locally): \n`;
 } else {
+  spinner.set("classify");
+  spinner.tick();
   const verdict = await classify(tool);
   if (!force) {
     if (verdict.kind === "native") {
-      refuse(`'${tool}' ships its own completion (\`${verdict.detail}\`) — that's better than a generated one. Enable it instead; not a curate candidate. (use --force to request anyway)`);
+      spinner.done();
+      refuse(
+        `'${tool}' ships its own completion (\`${verdict.detail}\`) — that's better than a generated one. Enable it instead; not a curate candidate. (use --force to request anyway)`,
+      );
     }
     if (verdict.kind === "low") {
-      refuse(`'${tool}' looks flat (${verdict.detail}) — zsh's file default already covers it, or run \`tab-please add ${tool}\` locally. (use --force to request anyway)`);
+      spinner.done();
+      refuse(
+        `'${tool}' looks flat (${verdict.detail}) — zsh's file default already covers it, or run \`tab-please add ${tool}\` locally. (use --force to request anyway)`,
+      );
     }
   }
+  spinner.set("version");
+  spinner.tick();
   const version = await toolVersion(tool);
+  spinner.done(
+    `${green(symbols.ok)} ${tool} ${dim("—")} ${verdict.format ?? "unknown"} ${dim(symbols.sep)} ${verdict.subcommands ?? 0} subcommands ${dim(symbols.sep)} ${verdict.flags ?? 0} flags`,
+  );
   body =
     `Requesting a curated tab-please completion for **${tool}**.\n\n` +
     "Auto-detected via `tab-please request`:\n" +
@@ -80,7 +100,7 @@ const url = `https://github.com/${REPO}/issues/new?${new URLSearchParams({ title
 
 // ── dry run: show what would be filed, touch nothing ─────────────────────────
 if (dryRun) {
-  console.log(`[dry-run] would file in ${REPO}:`);
+  console.log(`${cyan(symbols.native)} ${dim("[dry-run]")} would file in ${REPO}:`);
   console.log(`  title: ${title}`);
   console.log(`  url:   ${url}`);
   process.exit(0);
@@ -97,6 +117,8 @@ async function ghReady(): Promise<boolean> {
 }
 
 if (await ghReady()) {
+  const filing = makeSpinner({ verb: "filing", subject: tool });
+  filing.tick();
   // Dedup: an open or closed request for this exact title already exists?
   try {
     const { stdout } = await pexec(
@@ -104,9 +126,13 @@ if (await ghReady()) {
       ["issue", "list", "--repo", REPO, "--search", `${title} in:title`, "--state", "all", "--json", "url,title"],
       SAFE,
     );
-    const existing = (JSON.parse(stdout || "[]") as Array<{ url: string; title: string }>).find((i) => i.title === title);
+    const existing = (JSON.parse(stdout || "[]") as Array<{ url: string; title: string }>).find(
+      (i) => i.title === title,
+    );
     if (existing) {
-      console.log(`tab-please: '${tool}' was already requested → ${existing.url}`);
+      filing.done(
+        `${green(symbols.ok)} '${tool}' was already requested ${dim(symbols.arrow)} ${existing.url}`,
+      );
       process.exit(0);
     }
   } catch {
@@ -116,14 +142,22 @@ if (await ghReady()) {
   const createArgs = ["issue", "create", "--repo", REPO, "--title", title, "--body", body];
   try {
     const { stdout } = await pexec("gh", [...createArgs, "--label", "tool-request"], SAFE);
-    console.log(`tab-please: filed → ${stdout.trim()}`);
+    filing.done(`${green(symbols.ok)} filed ${dim(symbols.arrow)} ${stdout.trim()}`);
   } catch {
     // The label may not exist on the repo yet — retry without it.
-    const { stdout } = await pexec("gh", createArgs, SAFE);
-    console.log(`tab-please: filed → ${stdout.trim()}`);
+    try {
+      const { stdout } = await pexec("gh", createArgs, SAFE);
+      filing.done(`${green(symbols.ok)} filed ${dim(symbols.arrow)} ${stdout.trim()}`);
+    } catch (err: any) {
+      filing.done();
+      console.error(`${red(symbols.fail)} failed to file issue: ${String(err?.message ?? err)}`);
+      process.exit(1);
+    }
   }
 } else {
-  console.log(`tab-please: open this to file the request for '${tool}':\n  ${url}`);
+  console.log(
+    `${cyan(symbols.arrow)} open this to file the request for '${tool}':\n  ${url}`,
+  );
   const opener = process.platform === "darwin" ? "open" : "xdg-open";
   try {
     await pexec(opener, [url], SAFE);
