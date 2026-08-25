@@ -24,16 +24,21 @@ fpath=($fpath "${_TAB_PLEASE_DIR}/dist" "${_TAB_PLEASE_DIR}/completions" "${_TAB
 # completion.
 #
 # Init order matters here:
-#   · compinit hasn't run yet (omz, most managers): just autoload. compinit will
-#     scan our just-appended fpath dirs and register the `#compdef` tags itself.
-#   · compinit already ran (sourced late; some managers compinit first): its dump
-#     is frozen — `compinit -C` would NOT rescan our new dirs, so the tags never
-#     fire this session. So we bind each completion ourselves with `compdef`, but
-#     only when nothing already completes that command, so a tool's own (richer)
-#     completion still wins. `compdef` exists only once compinit has run, which is
-#     exactly the case where we need it — so its presence is the branch condition.
+#   · dump not loaded this session (`_comp_dumpfile` unset): just autoload.
+#     A later `compinit` (omz, Zap's default-zshrc, bare setups) scans our
+#     just-appended fpath dirs and registers the `#compdef` tags itself.
+#   · dump already loaded this session (`_comp_dumpfile` set): skip extra
+#     `compinit` — the dump is frozen and will not pick up our new dirs.
+#     Bind each completion with `compdef`, but only when nothing already
+#     completes that command, so a tool's own (richer) completion still wins.
+#     A recording `compdef` stub (replay after dump) is the same bind path.
 #
-# Relies on the repo invariant (CLAUDE.md): filename `_cmd` ↔ command `cmd` ↔
+# Never call `compinit` from this file. `$+functions[compinit]` is true after
+# a bare `autoload -Uz compinit`, which is how Zap users paid a second full
+# init every session. "Dump already loaded" is `_comp_dumpfile`; "safe to
+# bind" is `compdef` existing (after `compinit`, or as a recording stub).
+#
+# Relies on the repo invariant (AGENTS.md): filename `_cmd` ↔ command `cmd` ↔
 # `#compdef cmd`, so `${f#_}` is the command name.
 () {
   local f cmd
@@ -41,8 +46,14 @@ fpath=($fpath "${_TAB_PLEASE_DIR}/dist" "${_TAB_PLEASE_DIR}/completions" "${_TAB
     (( $+functions[$f] )) && continue
     autoload -Uz -- "$f"
     cmd=${f#_}
-    if (( $+functions[compdef] )) && [[ -z ${_comps[$cmd]} ]]; then
-      compdef "$f" "$cmd"
+    # `${+_comps}` first: before dump, `_comps` is unset and `[$cmd]` would
+    # be a scalar slice (and trip `set -u`). After dump, skip a command
+    # something else already completes (`:-` because a missing key is
+    # nounset-fatal under `set -u`).
+    if (( $+functions[compdef] )); then
+      if (( ! ${+_comps} )) || [[ -z ${_comps[$cmd]:-} ]]; then
+        compdef "$f" "$cmd"
+      fi
     fi
   done
 }

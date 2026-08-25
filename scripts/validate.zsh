@@ -14,6 +14,10 @@ for f in "${here}/.."/dist/_*(N) "${here}/.."/completions/_*(N); do
   print
 done
 
+print "── plugin load ──"
+zsh -f "${here}/plugin-load.zsh" || rc=1
+print
+
 # Static spec lint — catches malformed option specs the stubbed smoke test can't
 # (e.g. an option name with embedded whitespace). Needs bun, which CI always has.
 if (( $+commands[bun] )); then
