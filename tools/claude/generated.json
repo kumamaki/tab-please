@@ -1,6 +1,6 @@
 {
   "command": "claude",
-  "version": "2.1.161 (Claude Code)",
+  "version": "2.1.263 (Claude Code)",
   "format": "commander",
   "root": {
     "name": "claude",
@@ -52,6 +52,26 @@
       },
       {
         "names": [
+          "--autocompact"
+        ],
+        "arg": "auto|tokens",
+        "description": "Auto-compact window size (auto, or 100k–1M tokens)"
+      },
+      {
+        "names": [
+          "--ax-screen-reader"
+        ],
+        "description": "Render screen-reader friendly output (flat text, no decorative borders or animations)."
+      },
+      {
+        "names": [
+          "--bg",
+          "--background"
+        ],
+        "description": "Start the session in the background and return immediately. Prints the id that `claude attach`, `logs`, `stop` and `rm` take; `claude agents` lists them. With --resume <session-id>, continues that session in the background under the same ID, or starts a copy and says so when the session is already running"
+      },
+      {
+        "names": [
           "--bare"
         ],
         "description": "Minimal mode: skip hooks, LSP, plugin sync, attribution, auto-memory, background prefetches, keychain reads, and CLAUDE.md auto-discovery. Sets CLAUDE_CODE_SIMPLE=1. Anthropic auth is strictly ANTHROPIC_API_KEY or apiKeyHelper via --settings (OAuth and keychain are never read). 3P providers (Bedrock/Vertex/Foundry) use their own credentials. Skills still resolve via /skill-name. Explicitly provide context via: --system-prompt[-file], --append-system-prompt[-file], --add-dir (CLAUDE.md dirs), --mcp-config, --settings, --agents, --plugin-dir."
@@ -75,6 +95,14 @@
           "--chrome"
         ],
         "description": "Enable Claude in Chrome integration"
+      },
+      {
+        "names": [
+          "--cloud"
+        ],
+        "arg": "description|session_id|url",
+        "optional": true,
+        "description": "Create a cloud session with the given description, or attach to an existing one by session ID or claude.ai/code URL"
       },
       {
         "names": [
@@ -129,6 +157,13 @@
       },
       {
         "names": [
+          "--environment"
+        ],
+        "arg": "environment_id",
+        "description": "Create a new cloud session that runs on the given self-hosted environment (ccpool_...)."
+      },
+      {
+        "names": [
           "--exclude-dynamic-system-prompt-sections"
         ],
         "description": "Move per-machine sections (cwd, env info, memory paths, git status) from the system prompt into the first user message. Improves cross-user prompt-cache reuse. Only applies with the default system prompt (ignored with --system-prompt). (default: false)"
@@ -153,6 +188,12 @@
           "--fork-session"
         ],
         "description": "When resuming, create a new session ID instead of reusing the original (use with --resume or --continue)"
+      },
+      {
+        "names": [
+          "--forward-subagent-text"
+        ],
+        "description": "Forward subagent text and thinking blocks as assistant/user messages with parent_tool_use_id set (only works with --print and --output-format=stream-json)"
       },
       {
         "names": [
@@ -215,16 +256,10 @@
       },
       {
         "names": [
-          "--mcp-debug"
-        ],
-        "description": "[DEPRECATED. Use --debug instead] Enable MCP debug mode (shows MCP server errors)"
-      },
-      {
-        "names": [
           "--model"
         ],
         "arg": "model",
-        "description": "Model for the current session. Provide an alias for the latest model (e.g. 'sonnet' or 'opus') or a model's full name (e.g. 'claude-opus-4-8')."
+        "description": "Model for the current session. Provide an alias for the latest model (e.g. 'fable', 'opus', or 'sonnet') or a model's full name (e.g. 'claude-fable-5')."
       },
       {
         "names": [
@@ -263,14 +298,26 @@
           "--permission-mode"
         ],
         "arg": "mode",
-        "description": "Permission mode to use for the session (choices: \"acceptEdits\", \"auto\", \"bypassPermissions\", \"default\", \"dontAsk\", \"plan\")",
+        "description": "Permission mode to use for the session (choices: \"acceptEdits\", \"auto\", \"bypassPermissions\", \"manual\", \"dontAsk\", \"plan\")",
         "choices": [
           "acceptEdits",
           "auto",
           "bypassPermissions",
-          "default",
+          "manual",
           "dontAsk",
           "plan"
+        ]
+      },
+      {
+        "names": [
+          "--permission-prompts"
+        ],
+        "arg": "target",
+        "description": "Who answers permission prompts with --print: \"host\" (the SDK host or --permission-prompt-tool) or \"none\" (nobody: anything that would prompt is denied automatically; the permission mode still decides everything else) (choices: \"host\", \"none\", default: \"host\")",
+        "choices": [
+          "host",
+          "none",
+          "host"
         ]
       },
       {
@@ -336,12 +383,24 @@
       },
       {
         "names": [
+          "--restricted"
+        ],
+        "description": "Restricted mode: removes the built-in tools that run commands or code (Bash, PowerShell, REPL and the other code-running tools) and WebFetch unless --tools names them, and ignores user, project and local settings files (managed settings and --settings still apply; add --strict-mcp-config to skip MCP servers too). Also confines the file tools to the working directories (--add-dir included), refuses bypassPermissions, and lets only a person or the configured permission handler approve writes to settings, git and tool-configuration files."
+      },
+      {
+        "names": [
           "-r",
           "--resume"
         ],
         "arg": "value",
         "optional": true,
         "description": "Resume a conversation by session ID, or open interactive picker with optional search term"
+      },
+      {
+        "names": [
+          "--safe-mode"
+        ],
+        "description": "Start with all customizations (CLAUDE.md, skills, plugins, hooks, MCP servers, custom commands and agents, output styles, workflows, custom themes, keybindings, and more) disabled — useful for troubleshooting a broken configuration. Admin-managed (policy) settings still apply. Auth, model selection, built-in tools, and permissions work normally. Sets CLAUDE_CODE_SAFE_MODE=1."
       },
       {
         "names": [
@@ -376,6 +435,25 @@
         ],
         "arg": "prompt",
         "description": "System prompt to use for the session"
+      },
+      {
+        "names": [
+          "--system-prompt-snapshot"
+        ],
+        "arg": "on|off",
+        "description": "Record the system prompt once per conversation and reuse it verbatim on every request and resume (recommended: on). By default it is on for the built-in prompt, and passing --system-prompt or --append-system-prompt turns it off so the given text applies fresh each launch. on: an existing record in the conversation is sent as-is (a later launch's different --system-prompt/--append-system-prompt is ignored until compaction); otherwise the prompt is rendered with the append included, sent, and recorded. off: never record. No effect where system-prompt recording is not yet enabled. (choices: \"on\", \"off\")",
+        "choices": [
+          "on",
+          "off"
+        ]
+      },
+      {
+        "names": [
+          "--teleport"
+        ],
+        "arg": "session",
+        "optional": true,
+        "description": "Resume a teleport session, optionally specify session ID"
       },
       {
         "names": [
@@ -435,6 +513,12 @@
           },
           {
             "names": [
+              "--all"
+            ],
+            "description": "With --json: also include completed background sessions"
+          },
+          {
+            "names": [
               "--allow-dangerously-skip-permissions"
             ],
             "description": "Make bypass-permissions mode available to dispatched sessions without defaulting to it"
@@ -463,7 +547,7 @@
             "names": [
               "--json"
             ],
-            "description": "Print live sessions as a JSON array and exit (for scripting; does not require a TTY)"
+            "description": "Print active sessions (interactive and background) as a JSON array and exit (for scripting; does not require a TTY)"
           },
           {
             "names": [
@@ -495,6 +579,12 @@
           },
           {
             "names": [
+              "--restricted"
+            ],
+            "description": "Start dispatched sessions in restricted mode"
+          },
+          {
+            "names": [
               "--setting-sources"
             ],
             "arg": "sources",
@@ -515,6 +605,15 @@
           }
         ],
         "subcommands": []
+      },
+      {
+        "name": "attach",
+        "description": "Open a background session in this terminal. <id> is the short id that `claude --bg` prints and `claude agents` lists",
+        "flags": [],
+        "subcommands": [],
+        "positionals": [
+          "id"
+        ]
       },
       {
         "name": "auth",
@@ -582,7 +681,7 @@
       },
       {
         "name": "auto-mode",
-        "description": "Inspect auto mode classifier configuration",
+        "description": "Inspect or reset auto mode classifier configuration",
         "flags": [],
         "subcommands": [
           {
@@ -608,16 +707,74 @@
           {
             "name": "defaults",
             "description": "Print the default auto mode environment, allow, soft_deny, and hard_deny rules as JSON",
-            "flags": [],
+            "flags": [
+              {
+                "names": [
+                  "--label"
+                ],
+                "arg": "prefix",
+                "description": "Show only rules whose label starts with this prefix (case-insensitive)"
+              }
+            ],
+            "subcommands": []
+          },
+          {
+            "name": "reset",
+            "description": "Reset auto mode configuration to the shipped defaults by removing the autoMode section from your user settings file",
+            "flags": [
+              {
+                "names": [
+                  "-y",
+                  "--yes"
+                ],
+                "description": "Skip the confirmation prompt"
+              }
+            ],
             "subcommands": []
           }
         ]
       },
       {
         "name": "doctor",
-        "description": "Check the health of your Claude Code auto-updater. Note: The workspace trust dialog is skipped and stdio servers from .mcp.json are spawned for health checks. Only use this command in directories you trust.",
+        "description": "Check the health of your Claude Code installation. Reads settings files in the current directory without a trust prompt. For a full checkup that can also fix issues, run /doctor in a session.",
         "flags": [],
         "subcommands": []
+      },
+      {
+        "name": "gateway",
+        "description": "Run the enterprise auth/telemetry gateway",
+        "flags": [
+          {
+            "names": [
+              "--config"
+            ],
+            "arg": "path",
+            "description": "Path to gateway YAML config"
+          }
+        ],
+        "subcommands": []
+      },
+      {
+        "name": "import",
+        "description": "Import config from another AI coding agent into Claude Code",
+        "flags": [
+          {
+            "names": [
+              "--dry-run"
+            ],
+            "description": "Show what would be imported without writing anything"
+          },
+          {
+            "names": [
+              "--yes"
+            ],
+            "description": "Skip the interactive picker. On headless surfaces, pass --yes=<digest> from the `/import` preview."
+          }
+        ],
+        "subcommands": [],
+        "positionals": [
+          "source"
+        ]
       },
       {
         "name": "install",
@@ -633,6 +790,15 @@
         "subcommands": [],
         "positionals": [
           "target"
+        ]
+      },
+      {
+        "name": "logs",
+        "description": "Print a background session's recent terminal output",
+        "flags": [],
+        "subcommands": [],
+        "positionals": [
+          "id"
         ]
       },
       {
@@ -680,7 +846,7 @@
                 ],
                 "arg": "header",
                 "repeatable": true,
-                "description": "Set WebSocket headers (e.g. -H \"X-Api-Key: abc123\" -H \"X-Custom: value\")"
+                "description": "Set headers for HTTP/SSE servers (e.g. -H \"X-Api-Key: abc123\" -H \"X-Custom: value\")"
               },
               {
                 "names": [
@@ -723,7 +889,7 @@
           },
           {
             "name": "add-json",
-            "description": "Add an MCP server (stdio or SSE) with a JSON string",
+            "description": "Add an MCP server (stdio, SSE, HTTP, or WebSocket) with a JSON string",
             "flags": [
               {
                 "names": [
@@ -748,7 +914,7 @@
           },
           {
             "name": "get",
-            "description": "Get details about an MCP server. Unapproved .mcp.json servers are shown as ⏸ Pending approval and not connected to; approved servers are health-checked.",
+            "description": "Get details about an MCP server. Unapproved .mcp.json servers are shown as ⏸ Pending approval and not connected to; approved servers are health-checked unless disabled for this project.",
             "flags": [],
             "subcommands": [],
             "positionals": [
@@ -757,9 +923,34 @@
           },
           {
             "name": "list",
-            "description": "List configured MCP servers. Unapproved .mcp.json servers are shown as ⏸ Pending approval and not connected to; approved servers are health-checked.",
+            "description": "List configured MCP servers. Unapproved .mcp.json servers are shown as ⏸ Pending approval and not connected to; approved servers are health-checked unless disabled for this project.",
             "flags": [],
             "subcommands": []
+          },
+          {
+            "name": "login",
+            "description": "Authenticate with an MCP server (HTTP, SSE, or claude.ai connector)",
+            "flags": [
+              {
+                "names": [
+                  "--no-browser"
+                ],
+                "description": "Print the authorization URL instead of opening a browser (for SSH/headless sessions — paste the redirect URL back when prompted)"
+              }
+            ],
+            "subcommands": [],
+            "positionals": [
+              "name"
+            ]
+          },
+          {
+            "name": "logout",
+            "description": "Clear stored OAuth credentials for an MCP server",
+            "flags": [],
+            "subcommands": [],
+            "positionals": [
+              "name"
+            ]
           },
           {
             "name": "remove",
@@ -868,6 +1059,184 @@
             ]
           },
           {
+            "name": "eval",
+            "description": "Run eval cases (<eval dir>/**/case.yaml or prompt.md + graders/*.md; the eval dir is evals/ unless --eval-dir or the manifest says otherwise) against a plugin and report scored results. Target is a path, a plugin name, or a `plugin@marketplace` id — installed and skills-dir plugins both resolve (and add a no-plugin baseline arm)",
+            "flags": [
+              {
+                "names": [
+                  "--ablation"
+                ],
+                "arg": "mode",
+                "description": "Run a no-plugin baseline arm and report the score delta (none | with-without; default: with-without whenever a plugin resolves — by name, or from the target path — and none when nothing does; under with-without, graders marked with-only, incl. `tool_used: Skill`, are a plugin-fired indicator rather than part of the score)"
+              },
+              {
+                "names": [
+                  "--allow-tools"
+                ],
+                "arg": "tools",
+                "repeatable": true,
+                "description": "Operator grant for gated tools (Bash, Write, Edit, WebFetch, mcp__*). Supports Tool(pattern:*) syntax"
+              },
+              {
+                "names": [
+                  "--case"
+                ],
+                "arg": "glob",
+                "description": "Filter cases by name glob"
+              },
+              {
+                "names": [
+                  "--eval-dir"
+                ],
+                "arg": "dir",
+                "description": "Directory name (below the plugin) that holds the eval cases; results go to <plugin>/<dir>/results/ — for an installed-plugin target, ./<dir>/results/ with this flag, else ./evals/results/ (default dir: the manifest's experimental.evals value, else evals/)"
+              },
+              {
+                "names": [
+                  "--json"
+                ],
+                "arg": "path",
+                "optional": true,
+                "description": "Print the full run result (prompts, graders, per-run scores) as JSON to stdout, or write it to this .json file"
+              },
+              {
+                "names": [
+                  "--judge-model"
+                ],
+                "arg": "model",
+                "description": "Override LLM-grader model (default: haiku)"
+              },
+              {
+                "names": [
+                  "--keep-temp"
+                ],
+                "description": "Preserve scaffold dirs for debugging"
+              },
+              {
+                "names": [
+                  "--max-cost-usd"
+                ],
+                "arg": "usd",
+                "description": "Optional hard cost ceiling; abort and report partial results if hit (exit 2). Overrun is bounded to one agent run — when that run breaches, paid graders (llm/baseline) are skipped while free graders still score it. Runs are already bounded by max_turns and timeout_seconds — only set this when you need a strict budget"
+              },
+              {
+                "names": [
+                  "--mocks"
+                ],
+                "arg": "mode",
+                "description": "Mock stand-ins for MCP servers, from <eval dir>/mocks/ (record | off; default: record — off spawns the real servers, gated by --allow-tools as usual)"
+              },
+              {
+                "names": [
+                  "--model"
+                ],
+                "arg": "model",
+                "description": "Override model for all cases"
+              },
+              {
+                "names": [
+                  "--no-publish"
+                ],
+                "description": "Keep the HTML report local only; skip publishing it to claude.ai"
+              },
+              {
+                "names": [
+                  "--no-scaffold"
+                ],
+                "description": "Explicitly skip scaffold_script"
+              },
+              {
+                "names": [
+                  "--output-dir"
+                ],
+                "arg": "dir",
+                "description": "Directory for aggregate-result.json (default: ./<eval dir>/results/<timestamp>/)"
+              },
+              {
+                "names": [
+                  "--publish-report"
+                ],
+                "description": "Also require publishing the report to claude.ai (already the default when your account supports it); explains why if unavailable"
+              },
+              {
+                "names": [
+                  "--report"
+                ],
+                "arg": "path",
+                "description": "Write the self-contained HTML report (scores, prompts, grader verdicts) to <path> instead of the results dir"
+              },
+              {
+                "names": [
+                  "--runs"
+                ],
+                "arg": "n",
+                "description": "Override per-case runs (default: case.runs ?? 3)"
+              },
+              {
+                "names": [
+                  "--scaffold"
+                ],
+                "description": "Run each case's scaffold_script (runs author-supplied bash as you; off by default — only use on case files you authored)"
+              },
+              {
+                "names": [
+                  "--tag"
+                ],
+                "arg": "tag",
+                "repeatable": true,
+                "description": "Filter cases by tag (repeatable)"
+              },
+              {
+                "names": [
+                  "--threshold"
+                ],
+                "arg": "0..1",
+                "description": "Exit 1 if any case score is below this threshold (default: 1.0)"
+              },
+              {
+                "names": [
+                  "--verbose"
+                ],
+                "description": "Log per-message trace events to the debug log (use --debug-file to read them)"
+              }
+            ],
+            "subcommands": [
+              {
+                "name": "init",
+                "description": "Author an eval suite under the eval dir (evals/ unless --eval-dir or the manifest says otherwise) via an interview that sources inputs and designs graders. Use --bare <name> for a blank single-case template.",
+                "flags": [
+                  {
+                    "names": [
+                      "--bare"
+                    ],
+                    "description": "Write a blank template (prompt.md + graders/criteria.md) instead of running the interview"
+                  },
+                  {
+                    "names": [
+                      "--eval-dir"
+                    ],
+                    "arg": "dir",
+                    "description": "Directory (below the current directory) to write cases into (default: experimental.evals from the plugin.json in the current directory, else evals/)"
+                  },
+                  {
+                    "names": [
+                      "-i",
+                      "--interactive"
+                    ],
+                    "description": "Run the authoring interview (already the default in a terminal); requires an interactive terminal"
+                  }
+                ],
+                "subcommands": [],
+                "positionals": [
+                  "name"
+                ]
+              }
+            ],
+            "positionals": [
+              "target"
+            ]
+          },
+          {
             "name": "init",
             "aliases": [
               "new"
@@ -937,6 +1306,13 @@
                 ],
                 "arg": "scope",
                 "description": "Installation scope: user, project, or local (default: \"user\")"
+              },
+              {
+                "names": [
+                  "-y",
+                  "--yes"
+                ],
+                "description": "Accept the displayed marketplace-declared command without the confirmation prompt — a plugin installed by running a command, or one whose archive is fetched through a headersHelper command (required when stdin or stdout is not a TTY)"
               }
             ],
             "subcommands": [],
@@ -972,6 +1348,12 @@
                 "name": "add",
                 "description": "Add a marketplace from a URL, path, or GitHub repo",
                 "flags": [
+                  {
+                    "names": [
+                      "--claudeai"
+                    ],
+                    "description": "Add the marketplace of this name that claude.ai hosts for you, by its listed name or its local name (see: claude plugin marketplace list)"
+                  },
                   {
                     "names": [
                       "--scope"
@@ -1163,6 +1545,13 @@
                 ],
                 "arg": "scope",
                 "description": "Installation scope: user, project, local, managed (default: user)"
+              },
+              {
+                "names": [
+                  "-y",
+                  "--yes"
+                ],
+                "description": "Accept the displayed marketplace-declared command without the confirmation prompt — a changed install command, or the headersHelper command that fetches its archive (required when stdin or stdout is not a TTY)"
               }
             ],
             "subcommands": [],
@@ -1172,8 +1561,14 @@
           },
           {
             "name": "validate",
-            "description": "Validate a plugin or marketplace manifest",
+            "description": "Validate a plugin or marketplace manifest, or the skills, agents, and commands in a directory",
             "flags": [
+              {
+                "names": [
+                  "--json"
+                ],
+                "description": "Output the validation report as JSON (same exit codes)"
+              },
               {
                 "names": [
                   "--strict"
@@ -1232,10 +1627,42 @@
         ]
       },
       {
+        "name": "respawn",
+        "description": "Restart a background session, or all of them with --all, so it runs the current Claude Code version",
+        "flags": [],
+        "subcommands": [],
+        "positionals": [
+          "id"
+        ]
+      },
+      {
+        "name": "rm",
+        "description": "Delete a background session, and its worktree when that is safe. Works on sessions that have already exited",
+        "flags": [],
+        "subcommands": [],
+        "positionals": [
+          "id",
+          "--discard-unpushed <commit",
+          "worktree-id"
+        ]
+      },
+      {
         "name": "setup-token",
         "description": "Set up a long-lived authentication token (requires Claude subscription)",
         "flags": [],
         "subcommands": []
+      },
+      {
+        "name": "stop",
+        "aliases": [
+          "kill"
+        ],
+        "description": "Stop a background session. Its conversation is kept: `claude attach <id>` opens it again, `claude --resume` works once it is stopped",
+        "flags": [],
+        "subcommands": [],
+        "positionals": [
+          "id"
+        ]
       },
       {
         "name": "ultrareview",
@@ -1249,10 +1676,22 @@
           },
           {
             "names": [
+              "--no-post"
+            ],
+            "description": "Do not post the findings to the PR (the default; accepted for parity with the /ultrareview and /code-review ultra flags)"
+          },
+          {
+            "names": [
+              "--post"
+            ],
+            "description": "Post the finished review's findings to the PR as you (PR targets only; one plain comment, not a review)"
+          },
+          {
+            "names": [
               "--timeout"
             ],
             "arg": "minutes",
-            "description": "Maximum minutes to wait for the review to finish (default: 30)"
+            "description": "Maximum minutes to wait for the review to finish (default: 45)"
           }
         ],
         "subcommands": [],

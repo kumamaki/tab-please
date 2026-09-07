@@ -1,6 +1,6 @@
 {
   "command": "gh",
-  "version": "gh version 2.93.0 (2026-05-27)",
+  "version": "gh version 2.98.0 (2026-08-20)",
   "format": "cobra",
   "root": {
     "name": "gh",
@@ -847,6 +847,12 @@
                 "flags": [
                   {
                     "names": [
+                      "--all-interfaces"
+                    ],
+                    "description": "Listen on all network interfaces"
+                  },
+                  {
+                    "names": [
                       "-c",
                       "--codespace"
                     ],
@@ -1106,6 +1112,385 @@
         ]
       },
       {
+        "name": "discussion",
+        "description": "Work with GitHub Discussions (preview)",
+        "flags": [
+          {
+            "names": [
+              "-R",
+              "--repo"
+            ],
+            "arg": "[HOST/]OWNER/REPO",
+            "description": "Select another repository using the [HOST/]OWNER/REPO format"
+          }
+        ],
+        "subcommands": [
+          {
+            "name": "create",
+            "description": "Create a new discussion (preview)",
+            "flags": [
+              {
+                "names": [
+                  "-b",
+                  "--body"
+                ],
+                "arg": "string",
+                "description": "Body for the discussion"
+              },
+              {
+                "names": [
+                  "-F",
+                  "--body-file"
+                ],
+                "arg": "string",
+                "description": "Read body text from file (use \"-\" to read from stdin)"
+              },
+              {
+                "names": [
+                  "-c",
+                  "--category"
+                ],
+                "arg": "string",
+                "description": "Category name or slug for the discussion"
+              },
+              {
+                "names": [
+                  "-l",
+                  "--label"
+                ],
+                "arg": "strings",
+                "repeatable": true,
+                "description": "Labels to apply to the discussion"
+              },
+              {
+                "names": [
+                  "-R",
+                  "--repo"
+                ],
+                "arg": "[HOST/]OWNER/REPO",
+                "description": "Select another repository using the [HOST/]OWNER/REPO format"
+              },
+              {
+                "names": [
+                  "-t",
+                  "--title"
+                ],
+                "arg": "string",
+                "description": "Title for the discussion"
+              }
+            ],
+            "subcommands": []
+          },
+          {
+            "name": "list",
+            "description": "List discussions in a repository (preview)",
+            "flags": [
+              {
+                "names": [
+                  "--after"
+                ],
+                "arg": "string",
+                "description": "Cursor for the next page of results"
+              },
+              {
+                "names": [
+                  "--answered"
+                ],
+                "description": "Filter by answered state"
+              },
+              {
+                "names": [
+                  "-A",
+                  "--author"
+                ],
+                "arg": "string",
+                "description": "Filter by author"
+              },
+              {
+                "names": [
+                  "-c",
+                  "--category"
+                ],
+                "arg": "string",
+                "description": "Filter by category name or slug"
+              },
+              {
+                "names": [
+                  "-q",
+                  "--jq"
+                ],
+                "arg": "expression",
+                "description": "Filter JSON output using a jq expression"
+              },
+              {
+                "names": [
+                  "--json"
+                ],
+                "arg": "fields",
+                "repeatable": true,
+                "description": "Output JSON with the specified fields"
+              },
+              {
+                "names": [
+                  "-l",
+                  "--label"
+                ],
+                "arg": "strings",
+                "repeatable": true,
+                "description": "Filter by label"
+              },
+              {
+                "names": [
+                  "-L",
+                  "--limit"
+                ],
+                "arg": "int",
+                "description": "Maximum number of discussions to fetch"
+              },
+              {
+                "names": [
+                  "--order"
+                ],
+                "arg": "string",
+                "description": "Order of results: {asc|desc}"
+              },
+              {
+                "names": [
+                  "-R",
+                  "--repo"
+                ],
+                "arg": "[HOST/]OWNER/REPO",
+                "description": "Select another repository using the [HOST/]OWNER/REPO format"
+              },
+              {
+                "names": [
+                  "-S",
+                  "--search"
+                ],
+                "arg": "query",
+                "description": "Search discussions with query"
+              },
+              {
+                "names": [
+                  "--sort"
+                ],
+                "arg": "string",
+                "description": "Sort by field: {created|updated}"
+              },
+              {
+                "names": [
+                  "-s",
+                  "--state"
+                ],
+                "arg": "string",
+                "description": "Filter by state: {open|closed|all}"
+              },
+              {
+                "names": [
+                  "-t",
+                  "--template"
+                ],
+                "arg": "string",
+                "description": "Format JSON output using a Go template; see \"gh help formatting\""
+              },
+              {
+                "names": [
+                  "-w",
+                  "--web"
+                ],
+                "description": "List discussions in the web browser"
+              }
+            ],
+            "subcommands": []
+          },
+          {
+            "name": "comment",
+            "description": "Add, edit, or delete a comment or a reply on a discussion (preview)",
+            "flags": [
+              {
+                "names": [
+                  "-b",
+                  "--body"
+                ],
+                "arg": "string",
+                "description": "Comment body text"
+              },
+              {
+                "names": [
+                  "-F",
+                  "--body-file"
+                ],
+                "arg": "string",
+                "description": "Read body text from file (use \"-\" to read from standard input)"
+              },
+              {
+                "names": [
+                  "--delete"
+                ],
+                "description": "Delete the specified comment"
+              },
+              {
+                "names": [
+                  "--edit"
+                ],
+                "description": "Edit the specified comment"
+              },
+              {
+                "names": [
+                  "-R",
+                  "--repo"
+                ],
+                "arg": "[HOST/]OWNER/REPO",
+                "description": "Select another repository using the [HOST/]OWNER/REPO format"
+              },
+              {
+                "names": [
+                  "--yes"
+                ],
+                "description": "Skip the delete confirmation prompt"
+              }
+            ],
+            "subcommands": []
+          },
+          {
+            "name": "edit",
+            "description": "Edit a discussion (preview)",
+            "flags": [
+              {
+                "names": [
+                  "--add-label"
+                ],
+                "arg": "name",
+                "description": "Add labels by name"
+              },
+              {
+                "names": [
+                  "-b",
+                  "--body"
+                ],
+                "arg": "string",
+                "description": "New body for the discussion"
+              },
+              {
+                "names": [
+                  "-F",
+                  "--body-file"
+                ],
+                "arg": "string",
+                "description": "Read body text from file (use \"-\" to read from standard input)"
+              },
+              {
+                "names": [
+                  "-c",
+                  "--category"
+                ],
+                "arg": "string",
+                "description": "New category name or slug for the discussion"
+              },
+              {
+                "names": [
+                  "--remove-label"
+                ],
+                "arg": "name",
+                "description": "Remove labels by name"
+              },
+              {
+                "names": [
+                  "-R",
+                  "--repo"
+                ],
+                "arg": "[HOST/]OWNER/REPO",
+                "description": "Select another repository using the [HOST/]OWNER/REPO format"
+              },
+              {
+                "names": [
+                  "-t",
+                  "--title"
+                ],
+                "arg": "string",
+                "description": "New title for the discussion"
+              }
+            ],
+            "subcommands": []
+          },
+          {
+            "name": "view",
+            "description": "View a discussion (preview)",
+            "flags": [
+              {
+                "names": [
+                  "--after"
+                ],
+                "arg": "string",
+                "description": "Cursor for the next page"
+              },
+              {
+                "names": [
+                  "-c",
+                  "--comments"
+                ],
+                "description": "View discussion comments"
+              },
+              {
+                "names": [
+                  "-q",
+                  "--jq"
+                ],
+                "arg": "expression",
+                "description": "Filter JSON output using a jq expression"
+              },
+              {
+                "names": [
+                  "--json"
+                ],
+                "arg": "fields",
+                "repeatable": true,
+                "description": "Output JSON with the specified fields"
+              },
+              {
+                "names": [
+                  "-L",
+                  "--limit"
+                ],
+                "arg": "int",
+                "description": "Maximum number of comments or replies to fetch"
+              },
+              {
+                "names": [
+                  "--order"
+                ],
+                "arg": "string",
+                "description": "Order of comments or replies: {oldest|newest}"
+              },
+              {
+                "names": [
+                  "-R",
+                  "--repo"
+                ],
+                "arg": "[HOST/]OWNER/REPO",
+                "description": "Select another repository using the [HOST/]OWNER/REPO format"
+              },
+              {
+                "names": [
+                  "-t",
+                  "--template"
+                ],
+                "arg": "string",
+                "description": "Format JSON output using a Go template; see \"gh help formatting\""
+              },
+              {
+                "names": [
+                  "-w",
+                  "--web"
+                ],
+                "description": "Open a discussion in the browser"
+              }
+            ],
+            "subcommands": []
+          }
+        ]
+      },
+      {
         "name": "gist",
         "description": "Manage gists",
         "flags": [],
@@ -1257,6 +1642,12 @@
             "flags": [
               {
                 "names": [
+                  "--allow-escape-sequences"
+                ],
+                "description": "Allow printing terminal escape sequences"
+              },
+              {
+                "names": [
                   "-f",
                   "--filename"
                 ],
@@ -1316,6 +1707,22 @@
               },
               {
                 "names": [
+                  "--blocked-by"
+                ],
+                "arg": "numbers",
+                "repeatable": true,
+                "description": "Mark the new issue as blocked by these issue numbers or URLs"
+              },
+              {
+                "names": [
+                  "--blocking"
+                ],
+                "arg": "numbers",
+                "repeatable": true,
+                "description": "Mark the new issue as blocking these issue numbers or URLs"
+              },
+              {
+                "names": [
                   "-b",
                   "--body"
                 ],
@@ -1355,6 +1762,13 @@
               },
               {
                 "names": [
+                  "--parent"
+                ],
+                "arg": "number",
+                "description": "Add the new issue as a sub-issue of the specified parent number or URL"
+              },
+              {
+                "names": [
                   "-p",
                   "--project"
                 ],
@@ -1383,6 +1797,13 @@
                 ],
                 "arg": "string",
                 "description": "Supply a title. Will prompt for one otherwise."
+              },
+              {
+                "names": [
+                  "--type"
+                ],
+                "arg": "name",
+                "description": "Set the issue type by name"
               },
               {
                 "names": [
@@ -1427,7 +1848,7 @@
                   "--author"
                 ],
                 "arg": "string",
-                "description": "Filter by author"
+                "description": "Filter by author (use --app to filter by a GitHub App)"
               },
               {
                 "names": [
@@ -1500,6 +1921,13 @@
                 ],
                 "arg": "string",
                 "description": "Format JSON output using a Go template; see \"gh help formatting\""
+              },
+              {
+                "names": [
+                  "--type"
+                ],
+                "arg": "name",
+                "description": "Filter by issue type name"
               },
               {
                 "names": [
@@ -1751,6 +2179,20 @@
               },
               {
                 "names": [
+                  "--add-blocked-by"
+                ],
+                "arg": "number",
+                "description": "Add 'blocked by' relationships by issue number or URL"
+              },
+              {
+                "names": [
+                  "--add-blocking"
+                ],
+                "arg": "number",
+                "description": "Add 'blocking' relationships by issue number or URL"
+              },
+              {
+                "names": [
                   "--add-label"
                 ],
                 "arg": "name",
@@ -1762,6 +2204,13 @@
                 ],
                 "arg": "title",
                 "description": "Add the issue to projects by title"
+              },
+              {
+                "names": [
+                  "--add-sub-issue"
+                ],
+                "arg": "number",
+                "description": "Add sub-issues by number or URL"
               },
               {
                 "names": [
@@ -1789,10 +2238,31 @@
               },
               {
                 "names": [
+                  "--parent"
+                ],
+                "arg": "number",
+                "description": "Set the parent issue by number or URL"
+              },
+              {
+                "names": [
                   "--remove-assignee"
                 ],
                 "arg": "login",
                 "description": "Remove assigned users by their login. Use \"@me\" to unassign yourself, or \"@copilot\" to unassign Copilot."
+              },
+              {
+                "names": [
+                  "--remove-blocked-by"
+                ],
+                "arg": "number",
+                "description": "Remove 'blocked by' relationships by issue number or URL"
+              },
+              {
+                "names": [
+                  "--remove-blocking"
+                ],
+                "arg": "number",
+                "description": "Remove 'blocking' relationships by issue number or URL"
               },
               {
                 "names": [
@@ -1809,10 +2279,29 @@
               },
               {
                 "names": [
+                  "--remove-parent"
+                ],
+                "description": "Remove the parent issue"
+              },
+              {
+                "names": [
                   "--remove-project"
                 ],
                 "arg": "title",
                 "description": "Remove the issue from projects by title"
+              },
+              {
+                "names": [
+                  "--remove-sub-issue"
+                ],
+                "arg": "number",
+                "description": "Remove sub-issues by number or URL"
+              },
+              {
+                "names": [
+                  "--remove-type"
+                ],
+                "description": "Remove the issue type from the issue"
               },
               {
                 "names": [
@@ -1821,6 +2310,13 @@
                 ],
                 "arg": "string",
                 "description": "Set the new title."
+              },
+              {
+                "names": [
+                  "--type"
+                ],
+                "arg": "name",
+                "description": "Set the issue type by name"
               },
               {
                 "names": [
@@ -2217,7 +2713,7 @@
                   "--author"
                 ],
                 "arg": "string",
-                "description": "Filter by author"
+                "description": "Filter by author (use --app to filter by a GitHub App)"
               },
               {
                 "names": [
@@ -2393,6 +2889,13 @@
                   "--recurse-submodules"
                 ],
                 "description": "Update all submodules after checkout"
+              },
+              {
+                "names": [
+                  "--worktree"
+                ],
+                "arg": "path",
+                "description": "Check out the pull request into a worktree at the given path"
               },
               {
                 "names": [
@@ -2580,6 +3083,12 @@
             "name": "diff",
             "description": "View changes in a pull request",
             "flags": [
+              {
+                "names": [
+                  "--allow-escape-sequences"
+                ],
+                "description": "Allow printing terminal escape sequences"
+              },
               {
                 "names": [
                   "--color"
@@ -3707,6 +4216,13 @@
               },
               {
                 "names": [
+                  "--field"
+                ],
+                "arg": "string",
+                "description": "Name of the field to update"
+              },
+              {
+                "names": [
                   "--field-id"
                 ],
                 "arg": "string",
@@ -3750,6 +4266,13 @@
               },
               {
                 "names": [
+                  "--owner"
+                ],
+                "arg": "string",
+                "description": "Login of the owner. Use \"@me\" for the current user."
+              },
+              {
+                "names": [
                   "--project-id"
                 ],
                 "arg": "string",
@@ -3783,6 +4306,19 @@
                 ],
                 "arg": "string",
                 "description": "Title of the draft issue item"
+              },
+              {
+                "names": [
+                  "--url"
+                ],
+                "arg": "string",
+                "description": "URL of the issue or pull request whose project item to edit"
+              },
+              {
+                "names": [
+                  "--value"
+                ],
+                "description": "Value to set on the field named by --field"
               }
             ],
             "subcommands": []
@@ -3791,6 +4327,22 @@
             "name": "item-list",
             "description": "List the items in a project",
             "flags": [
+              {
+                "names": [
+                  "--field"
+                ],
+                "arg": "stringArray",
+                "repeatable": true,
+                "description": "Name of a field to show as an extra column"
+              },
+              {
+                "names": [
+                  "--field-id"
+                ],
+                "arg": "stringArray",
+                "repeatable": true,
+                "description": "ID of a field to show as an extra column"
+              },
               {
                 "names": [
                   "--format"
@@ -4285,6 +4837,12 @@
             "name": "download",
             "description": "Download release assets",
             "flags": [
+              {
+                "names": [
+                  "--allow-escape-sequences"
+                ],
+                "description": "Allow printing terminal escape sequences when writing an asset to standard output"
+              },
               {
                 "names": [
                   "-A",
@@ -5326,6 +5884,118 @@
             ]
           },
           {
+            "name": "read-dir",
+            "description": "List a directory in a repository (preview)",
+            "flags": [
+              {
+                "names": [
+                  "-q",
+                  "--jq"
+                ],
+                "arg": "expression",
+                "description": "Filter JSON output using a jq expression"
+              },
+              {
+                "names": [
+                  "--json"
+                ],
+                "arg": "fields",
+                "repeatable": true,
+                "description": "Output JSON with the specified fields"
+              },
+              {
+                "names": [
+                  "--ref"
+                ],
+                "arg": "string",
+                "description": "The branch, tag, or commit to list from"
+              },
+              {
+                "names": [
+                  "-R",
+                  "--repo"
+                ],
+                "arg": "[HOST/]OWNER/REPO",
+                "description": "Select another repository using the [HOST/]OWNER/REPO format"
+              },
+              {
+                "names": [
+                  "-t",
+                  "--template"
+                ],
+                "arg": "string",
+                "description": "Format JSON output using a Go template; see \"gh help formatting\""
+              }
+            ],
+            "subcommands": []
+          },
+          {
+            "name": "read-file",
+            "description": "Read a file from a repository (preview)",
+            "flags": [
+              {
+                "names": [
+                  "--allow-escape-sequences"
+                ],
+                "description": "Allow printing terminal escape sequences"
+              },
+              {
+                "names": [
+                  "--clobber"
+                ],
+                "description": "Overwrite the output path if it already exists"
+              },
+              {
+                "names": [
+                  "-q",
+                  "--jq"
+                ],
+                "arg": "expression",
+                "description": "Filter JSON output using a jq expression"
+              },
+              {
+                "names": [
+                  "--json"
+                ],
+                "arg": "fields",
+                "repeatable": true,
+                "description": "Output JSON with the specified fields"
+              },
+              {
+                "names": [
+                  "-o",
+                  "--output"
+                ],
+                "arg": "path",
+                "description": "Write the file to a path instead of stdout"
+              },
+              {
+                "names": [
+                  "--ref"
+                ],
+                "arg": "string",
+                "description": "The branch, tag, or commit to read from"
+              },
+              {
+                "names": [
+                  "-R",
+                  "--repo"
+                ],
+                "arg": "[HOST/]OWNER/REPO",
+                "description": "Select another repository using the [HOST/]OWNER/REPO format"
+              },
+              {
+                "names": [
+                  "-t",
+                  "--template"
+                ],
+                "arg": "string",
+                "description": "Format JSON output using a Go template; see \"gh help formatting\""
+              }
+            ],
+            "subcommands": []
+          },
+          {
             "name": "rename",
             "description": "Rename a repository",
             "flags": [
@@ -5477,6 +6147,12 @@
               },
               {
                 "names": [
+                  "--all"
+                ],
+                "description": "Install all skills without prompting for skill selection"
+              },
+              {
+                "names": [
                   "--allow-hidden-dirs"
                 ],
                 "description": "Include skills in hidden directories (e.g. .claude/skills/, .agents/skills/)"
@@ -5520,6 +6196,58 @@
                   "--upstream"
                 ],
                 "description": "Install from the upstream source when a re-published skill is detected"
+              }
+            ],
+            "subcommands": []
+          },
+          {
+            "name": "list",
+            "description": "List installed skills (preview)",
+            "flags": [
+              {
+                "names": [
+                  "--agent"
+                ],
+                "arg": "string",
+                "description": "Filter by target agent: {github-copilot|claude-code|cursor|codex|gemini-cli|antigravity|antigravity-cli|antigravity2.0|adal|amp|augment|bob|cline|codebuddy|command-code|continue|cortex|crush|deepagents|devin|droid|firebender|goose|grok|iflow-cli|junie|kilo|kimi-cli|kiro-cli|kode|mcpjam|mistral-vibe|mux|neovate|openclaw|opencode|openhands|pi|pochi|qoder|qwen-code|replit|roo|trae|trae-cn|universal|warp|zencoder}"
+              },
+              {
+                "names": [
+                  "--dir"
+                ],
+                "arg": "string",
+                "description": "Scan a custom directory for installed skills"
+              },
+              {
+                "names": [
+                  "-q",
+                  "--jq"
+                ],
+                "arg": "expression",
+                "description": "Filter JSON output using a jq expression"
+              },
+              {
+                "names": [
+                  "--json"
+                ],
+                "arg": "fields",
+                "repeatable": true,
+                "description": "Output JSON with the specified fields"
+              },
+              {
+                "names": [
+                  "--scope"
+                ],
+                "arg": "string",
+                "description": "Filter by installation scope: {project|user}"
+              },
+              {
+                "names": [
+                  "-t",
+                  "--template"
+                ],
+                "arg": "string",
+                "description": "Format JSON output using a Go template; see \"gh help formatting\""
               }
             ],
             "subcommands": []
@@ -6362,6 +7090,13 @@
           },
           {
             "names": [
+              "--worktree"
+            ],
+            "arg": "path",
+            "description": "Check out the pull request into a worktree at the given path"
+          },
+          {
+            "names": [
               "-R",
               "--repo"
             ],
@@ -6590,6 +7325,12 @@
         "name": "api",
         "description": "Make an authenticated GitHub API request",
         "flags": [
+          {
+            "names": [
+              "--allow-escape-sequences"
+            ],
+            "description": "Allow printing terminal escape sequences"
+          },
           {
             "names": [
               "--cache"
@@ -7684,9 +8425,8 @@
                   "-R",
                   "--repo"
                 ],
-                "arg": "strings",
-                "repeatable": true,
-                "description": "Filter on repository"
+                "arg": "OWNER/REPO",
+                "description": "Filter on repository, in OWNER/REPO format"
               },
               {
                 "names": [
@@ -7837,9 +8577,8 @@
                   "-R",
                   "--repo"
                 ],
-                "arg": "strings",
-                "repeatable": true,
-                "description": "Filter on repository"
+                "arg": "OWNER/REPO",
+                "description": "Filter on repository, in OWNER/REPO format"
               },
               {
                 "names": [
@@ -7910,7 +8649,7 @@
                   "--author"
                 ],
                 "arg": "string",
-                "description": "Filter by author"
+                "description": "Filter by author (use --app to filter by a GitHub App)"
               },
               {
                 "names": [
@@ -8085,9 +8824,15 @@
                   "-R",
                   "--repo"
                 ],
-                "arg": "strings",
-                "repeatable": true,
-                "description": "Filter on repository"
+                "arg": "OWNER/REPO",
+                "description": "Filter on repository, in OWNER/REPO format"
+              },
+              {
+                "names": [
+                  "--search-type"
+                ],
+                "arg": "string",
+                "description": "Type of issue search to perform: {lexical|semantic|hybrid}"
               },
               {
                 "names": [
@@ -8172,7 +8917,7 @@
                   "--author"
                 ],
                 "arg": "string",
-                "description": "Filter by author"
+                "description": "Filter by author (use --app to filter by a GitHub App)"
               },
               {
                 "names": [
@@ -8383,9 +9128,8 @@
                   "-R",
                   "--repo"
                 ],
-                "arg": "strings",
-                "repeatable": true,
-                "description": "Filter on repository"
+                "arg": "OWNER/REPO",
+                "description": "Filter on repository, in OWNER/REPO format"
               },
               {
                 "names": [
